@@ -1,0 +1,6 @@
+{
+  "url": "https://mcp.teletype.app/mcp",
+  "headers": {
+    "X-Teletype-Api-Token": "{{$vars.teletypeApiToken}}"
+  }
+}

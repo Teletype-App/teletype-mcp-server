@@ -1,0 +1,14 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "servers": {
+      "teletype": {
+        "type": "local",
+        "command": ["npx", "-y", "teletype-mcp-server", "--stdio"],
+        "environment": { "TELETYPE_API_TOKEN": "{env:TELETYPE_API_TOKEN}" },
+        "protocol": "auto",
+        "codemode": false
+      }
+    }
+  }
+}

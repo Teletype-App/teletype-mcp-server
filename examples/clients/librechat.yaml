@@ -1,0 +1,10 @@
+mcpServers:
+  teletype:
+    type: streamable-http
+    url: https://mcp.teletype.app/mcp
+    headers:
+      X-Teletype-Api-Token: "{{TELETYPE_API_TOKEN}}"
+    customUserVars:
+      TELETYPE_API_TOKEN:
+        title: Teletype Public API token
+        description: Enter your Teletype Public API token

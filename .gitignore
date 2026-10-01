@@ -1,0 +1,13 @@
+.idea/
+node_modules/
+dist/
+.env
+.env.local
+.env.eval
+.DS_Store
+*.log
+coverage/
+reports/
+.stryker-tmp/
+artifacts/
+eval-results/raw/

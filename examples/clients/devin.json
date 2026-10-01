@@ -1,0 +1,8 @@
+{
+  "transport": "STDIO",
+  "command": "npx",
+  "args": ["-y", "teletype-mcp-server", "--stdio"],
+  "env_variables": {
+    "TELETYPE_API_TOKEN": "your-teletype-public-api-token"
+  }
+}

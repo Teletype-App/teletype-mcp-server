@@ -1,0 +1,27 @@
+{
+  "mcpServers": {
+    "teletype": {
+      "command": "npx",
+      "args": ["-y", "teletype-mcp-server", "--stdio"],
+      "tools": {
+        "find_conversations": { "eager": true },
+        "find_messages": { "eager": true },
+        "lookup_client_profile": { "eager": true },
+        "list_clients": { "eager": true },
+        "read_conversation_thread": { "eager": true },
+        "read_client_history": { "eager": true },
+        "send_reply_to_client": { "eager": true },
+        "create_dialog_by_phone": { "eager": true },
+        "annotate_client_record": { "eager": true },
+        "resolve_conversation": { "eager": true },
+        "list_workspace_metadata": { "eager": true },
+        "get_project_status": { "eager": true },
+        "manage_sent_message": { "eager": true },
+        "send_whatsapp_template": { "eager": true },
+        "manage_operator_group": { "eager": true },
+        "configure_project_webhook": { "eager": true },
+        "get_capabilities": { "eager": true }
+      }
+    }
+  }
+}

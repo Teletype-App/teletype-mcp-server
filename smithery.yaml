@@ -1,0 +1,21 @@
+# Smithery configuration for Teletype MCP Server
+# https://smithery.ai/docs/config#smitheryyaml
+
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    required:
+      - teletypeApiToken
+    properties:
+      teletypeApiToken:
+        type: string
+        description: Teletype Public API Token from your Teletype project settings
+  commandFunction: |
+    (config) => ({
+      command: 'npx',
+      args: ['-y', 'teletype-mcp-server', '--stdio'],
+      env: {
+        TELETYPE_API_TOKEN: config.teletypeApiToken
+      }
+    })

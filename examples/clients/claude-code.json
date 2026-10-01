@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "teletype": {
+      "command": "npx",
+      "args": ["-y", "teletype-mcp-server", "--stdio"],
+      "env": { "TELETYPE_API_TOKEN": "${TELETYPE_API_TOKEN}" }
+    }
+  }
+}

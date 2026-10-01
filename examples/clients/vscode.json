@@ -1,0 +1,19 @@
+{
+  "inputs": [
+    {
+      "type": "promptString",
+      "id": "teletype-api-token",
+      "description": "Teletype Public API token",
+      "password": true
+    }
+  ],
+  "servers": {
+    "teletype": {
+      "type": "http",
+      "url": "https://mcp.teletype.app/mcp",
+      "headers": {
+        "X-Teletype-Api-Token": "${input:teletype-api-token}"
+      }
+    }
+  }
+}

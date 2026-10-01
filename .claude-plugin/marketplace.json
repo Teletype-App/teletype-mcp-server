@@ -1,0 +1,17 @@
+{
+  "name": "teletype-mcp-server",
+  "description": "MCP server for the Teletype omnichat platform, packaged with the teletype-support skill and support slash commands for Claude Code",
+  "owner": { "name": "Teletype-App", "url": "https://github.com/Teletype-App" },
+  "plugins": [
+    {
+      "name": "teletype",
+      "source": "./plugin",
+      "description": "Teletype MCP server with the teletype-support skill and support slash commands for Claude Code",
+      "version": "0.1.0",
+      "author": { "name": "Teletype-App" },
+      "license": "MIT",
+      "keywords": ["mcp", "teletype", "support", "omnichat"],
+      "category": "mcp"
+    }
+  ]
+}

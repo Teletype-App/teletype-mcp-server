@@ -1,0 +1,4 @@
+[mcp_servers.teletype]
+command = "npx"
+args = ["-y", "teletype-mcp-server", "--stdio"]
+env_vars = ["TELETYPE_API_TOKEN"]

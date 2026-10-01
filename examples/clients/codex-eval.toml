@@ -1,0 +1,4 @@
+[mcp_servers.teletype_eval]
+command = "npx"
+args = ["-y", "teletype-mcp-server", "--eval-fixture"]
+default_tools_approval_mode = "approve"

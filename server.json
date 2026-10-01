@@ -1,0 +1,43 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.teletype-app/teletype-mcp-server",
+  "title": "Teletype",
+  "description": "Manage Teletype support conversations, customers, messages, and workspace settings",
+  "version": "0.1.0",
+  "repository": {
+    "url": "https://github.com/Teletype-App/teletype-mcp-server",
+    "source": "github"
+  },
+  "websiteUrl": "https://teletype.app",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://mcp.teletype.app/mcp",
+      "headers": [
+        {
+          "name": "X-Teletype-Api-Token",
+          "description": "Public API token from your Teletype project settings",
+          "isRequired": true,
+          "isSecret": true
+        }
+      ]
+    }
+  ],
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "teletype-mcp-server",
+      "version": "0.1.0",
+      "transport": { "type": "stdio" },
+      "packageArguments": [{ "type": "positional", "value": "--stdio" }],
+      "environmentVariables": [
+        {
+          "name": "TELETYPE_API_TOKEN",
+          "description": "Public API token from your Teletype project settings",
+          "isRequired": true,
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+mcpServers:
+  - name: Teletype
+    type: streamable-http
+    url: https://mcp.teletype.app/mcp
+    requestOptions:
+      headers:
+        X-Teletype-Api-Token: "${{ secrets.TELETYPE_API_TOKEN }}"

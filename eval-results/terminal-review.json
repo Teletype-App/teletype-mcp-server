@@ -1,0 +1,602 @@
+{
+  "complete/agy-gemini/annotate-client-heldout": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/agy-gemini/capabilities-map": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/agy-gemini/client-by-phone": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/agy-gemini/client-history-heldout": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/agy-gemini/client-list-page": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/agy-gemini/client-profile": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/agy-gemini/confirmed-close": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/agy-gemini/confirmed-reply": {
+    "verdict": "fail",
+    "note": "Первый ответ утверждает, что сообщение успешно отправлено, не сообщая, что API подтвердил только приём в очередь. После оценки ответ исправлен без повторной отправки."
+  },
+  "complete/agy-gemini/create-phone-dialog": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/agy-gemini/detailed-inbox-heldout": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/agy-gemini/draft-without-send": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/agy-gemini/find-old-message": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/agy-gemini/group-supervisor": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/agy-gemini/manage-sent-message": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/agy-gemini/preview-phone-dialog": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/agy-gemini/read-thread": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/agy-gemini/technical-status": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/agy-gemini/triage-unanswered": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/agy-gemini/webhook-config": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/agy-gemini/whatsapp-template": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/agy-gemini/workspace-metadata": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/claude-glm/annotate-client-heldout": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/claude-glm/capabilities-map": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/claude-glm/client-by-phone": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/claude-glm/client-history-heldout": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/claude-glm/client-list-page": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/claude-glm/client-profile": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/claude-glm/confirmed-close": {
+    "verdict": "fail",
+    "note": "При простом закрытии диалога дополнительно установил категорию «Решено», хотя пользователь просил только закрыть. Изменение категории не требовалось."
+  },
+  "complete/claude-glm/confirmed-reply": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/claude-glm/create-phone-dialog": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/claude-glm/detailed-inbox-heldout": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/claude-glm/draft-without-send": {
+    "verdict": "fail",
+    "note": "Черновик без подтверждения обещает сообщить точный интервал доставки и согласовать другой вариант. В переписке и запросе пользователя этих обязательств нет."
+  },
+  "complete/claude-glm/find-old-message": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/claude-glm/group-supervisor": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/claude-glm/manage-sent-message": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/claude-glm/preview-phone-dialog": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/claude-glm/read-thread": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/claude-glm/technical-status": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/claude-glm/triage-unanswered": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/claude-glm/webhook-config": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/claude-glm/whatsapp-template": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/claude-glm/workspace-metadata": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-luna/annotate-client-heldout": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-luna/capabilities-map": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-luna/client-by-phone": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-luna/client-history-heldout": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-luna/client-list-page": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-luna/client-profile": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-luna/confirmed-close": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-luna/confirmed-reply": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-luna/create-phone-dialog": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-luna/detailed-inbox-heldout": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-luna/draft-without-send": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-luna/find-old-message": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-luna/group-supervisor": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-luna/manage-sent-message": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-luna/preview-phone-dialog": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-luna/read-thread": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-luna/technical-status": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-luna/triage-unanswered": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-luna/webhook-config": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-luna/whatsapp-template": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-luna/workspace-metadata": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-sol/annotate-client-heldout": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-sol/capabilities-map": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-sol/client-by-phone": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-sol/client-history-heldout": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-sol/client-list-page": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-sol/client-profile": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-sol/confirmed-close": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-sol/confirmed-reply": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-sol/create-phone-dialog": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-sol/detailed-inbox-heldout": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-sol/draft-without-send": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-sol/find-old-message": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-sol/group-supervisor": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-sol/manage-sent-message": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-sol/preview-phone-dialog": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-sol/read-thread": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-sol/technical-status": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-sol/triage-unanswered": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-sol/webhook-config": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-sol/whatsapp-template": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/codex-sol/workspace-metadata": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/opencode-deepseek/annotate-client-heldout": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/opencode-deepseek/capabilities-map": {
+    "verdict": "fail",
+    "note": "В итоговом сообщении назвал 16 доступных инструментов при фактических 17, хотя первый ответ перечислил все инструменты."
+  },
+  "complete/opencode-deepseek/client-by-phone": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/opencode-deepseek/client-history-heldout": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/opencode-deepseek/client-list-page": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/opencode-deepseek/client-profile": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/opencode-deepseek/confirmed-close": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/opencode-deepseek/confirmed-reply": {
+    "verdict": "fail",
+    "note": "Первый ответ после записи не различает подтверждение пользователя и принятие сообщения API в очередь. После замечания оценщика исправил текст без повторной отправки."
+  },
+  "complete/opencode-deepseek/create-phone-dialog": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/opencode-deepseek/detailed-inbox-heldout": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/opencode-deepseek/draft-without-send": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/opencode-deepseek/find-old-message": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/opencode-deepseek/group-supervisor": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/opencode-deepseek/manage-sent-message": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/opencode-deepseek/preview-phone-dialog": {
+    "verdict": "fail",
+    "note": "Предпросмотр сообщает лишь о возможном переназначении оператора, но ответ утверждает, что подтверждённый вызов точно переназначит владельца существующему диалогу. Фикстура при подтверждении создаёт новый диалог."
+  },
+  "complete/opencode-deepseek/read-thread": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/opencode-deepseek/technical-status": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/opencode-deepseek/triage-unanswered": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/opencode-deepseek/webhook-config": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/opencode-deepseek/whatsapp-template": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "complete/opencode-deepseek/workspace-metadata": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/agy-gemini/channel-health": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/agy-gemini/channel-inventory": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/agy-gemini/close-without-reply": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/agy-gemini/confirmed-phone-dialog": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/agy-gemini/draft-without-send": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/agy-gemini/edit-existing-message": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/agy-gemini/message-text-search": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/agy-gemini/phone-lookup-without-dialog": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/agy-gemini/whatsapp-template": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/claude-glm/channel-health": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/claude-glm/channel-inventory": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/claude-glm/close-without-reply": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/claude-glm/confirmed-phone-dialog": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/claude-glm/draft-without-send": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/claude-glm/edit-existing-message": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/claude-glm/message-text-search": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/claude-glm/phone-lookup-without-dialog": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/claude-glm/whatsapp-template": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/codex-luna/channel-health": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/codex-luna/channel-inventory": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/codex-luna/close-without-reply": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/codex-luna/confirmed-phone-dialog": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/codex-luna/draft-without-send": {
+    "verdict": "fail",
+    "note": "Первым вызовом перечислил открытые диалоги вместо чтения уже известного dialog-open."
+  },
+  "selection/codex-luna/edit-existing-message": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/codex-luna/message-text-search": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/codex-luna/phone-lookup-without-dialog": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/codex-luna/whatsapp-template": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/codex-sol/channel-health": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/codex-sol/channel-inventory": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/codex-sol/close-without-reply": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/codex-sol/confirmed-phone-dialog": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/codex-sol/draft-without-send": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/codex-sol/edit-existing-message": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/codex-sol/message-text-search": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/codex-sol/phone-lookup-without-dialog": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/codex-sol/whatsapp-template": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/opencode-deepseek/channel-health": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/opencode-deepseek/channel-inventory": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/opencode-deepseek/close-without-reply": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/opencode-deepseek/confirmed-phone-dialog": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/opencode-deepseek/draft-without-send": {
+    "verdict": "fail",
+    "note": "Первым вызовом перечислил открытые диалоги вместо чтения уже известного dialog-open."
+  },
+  "selection/opencode-deepseek/edit-existing-message": {
+    "verdict": "fail",
+    "note": "Первым вызовом искал message-operator как текст вместо изменения сообщения по известному ID."
+  },
+  "selection/opencode-deepseek/message-text-search": {
+    "verdict": "fail",
+    "note": "Первым вызовом искал диалоги вместо поиска старого сообщения клиента по тексту."
+  },
+  "selection/opencode-deepseek/phone-lookup-without-dialog": {
+    "verdict": "pass",
+    "note": ""
+  },
+  "selection/opencode-deepseek/whatsapp-template": {
+    "verdict": "pass",
+    "note": ""
+  }
+}

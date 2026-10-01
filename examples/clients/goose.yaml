@@ -1,0 +1,9 @@
+extensions:
+  teletype:
+    name: teletype
+    type: streamable_http
+    enabled: true
+    uri: https://mcp.teletype.app/mcp
+    headers:
+      X-Teletype-Api-Token: your-teletype-public-api-token
+    timeout: 300

@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "teletype": {
+      "serverUrl": "https://mcp.teletype.app/mcp",
+      "headers": {
+        "X-Teletype-Api-Token": "${env:TELETYPE_API_TOKEN}"
+      }
+    }
+  }
+}

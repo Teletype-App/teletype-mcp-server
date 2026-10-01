@@ -1,0 +1,43 @@
+{
+  "$schema": "https://raw.githubusercontent.com/modelcontextprotocol/mcpb/main/schemas/mcpb-manifest-v0.3.schema.json",
+  "manifest_version": "0.3",
+  "name": "teletype-mcp-server",
+  "display_name": "Teletype",
+  "version": "0.1.0",
+  "description": "Work with Teletype conversations, customers, channels, and project settings from Claude Desktop.",
+  "author": {
+    "name": "Teletype",
+    "url": "https://teletype.app"
+  },
+  "license": "MIT",
+  "privacy_policies": ["https://teletype.app/files/policy.pdf"],
+  "keywords": ["teletype", "customer support", "messaging"],
+  "compatibility": {
+    "platforms": ["darwin", "win32", "linux"],
+    "runtimes": {
+      "node": "^20.19.0 || ^22.13.0 || ^24.0.0"
+    }
+  },
+  "server": {
+    "type": "node",
+    "entry_point": "dist/stdio.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/dist/stdio.js"],
+      "env": {
+        "TELETYPE_API_TOKEN": "${user_config.teletype_api_token}"
+      }
+    }
+  },
+  "user_config": {
+    "teletype_api_token": {
+      "type": "string",
+      "title": "Teletype Public API token",
+      "description": "Token from the Teletype project settings.",
+      "sensitive": true,
+      "required": true
+    }
+  },
+  "tools_generated": true,
+  "prompts_generated": true
+}

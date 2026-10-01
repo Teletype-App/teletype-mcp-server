@@ -1,0 +1,11 @@
+{
+  "$schema": "https://unpkg.com/knip@latest/schema.json",
+  "entry": [
+    "scripts/aggregate-week.mjs",
+    "scripts/extract-week.mjs",
+    "scripts/run-terminal-eval.mjs",
+    "scripts/summarize-terminal-eval.mjs",
+    "src/eval/tool-selection.ts"
+  ],
+  "ignoreDependencies": ["@anthropic-ai/mcpb"]
+}

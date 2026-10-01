@@ -1,0 +1,64 @@
+name: Bug Report
+description: Report a reproducible bug in teletype-mcp-server
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not include API tokens, customer data, or unredacted logs.
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: What version of teletype-mcp-server are you using? (e.g. `npx teletype-mcp-server --version`)
+    validations:
+      required: true
+  - type: dropdown
+    id: transport
+    attributes:
+      label: Transport
+      description: Which transport mode are you running?
+      options:
+        - stdio
+        - Streamable HTTP
+    validations:
+      required: true
+  - type: dropdown
+    id: client
+    attributes:
+      label: MCP Client
+      description: Which client is connecting to the MCP server?
+      options:
+        - Claude Desktop
+        - Claude Code CLI
+        - Cursor
+        - Zed
+        - Windsurf
+        - Antigravity
+        - Other (specify below)
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the Bug
+      description: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Steps or tool call parameters to reproduce the behavior.
+      placeholder: |
+        1. Run tool '...' with arguments '...'
+        2. See error '...'
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Server Logs / Error Output
+      description: Relevant logs (mask any sensitive API tokens).
+      render: shell

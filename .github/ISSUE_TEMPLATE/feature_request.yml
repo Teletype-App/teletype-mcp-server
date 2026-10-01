@@ -1,0 +1,34 @@
+name: Feature Request
+description: Request a server feature or change
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe the task this change would help with. Do not include API tokens or customer data.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or Motivation
+      description: Which task is difficult or impossible with the current server?
+      placeholder: "I need to ..., but the server currently ..."
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the tool, parameter, prompt, resource, or CLI flag you would like to see added.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Any alternative solutions or workarounds you have considered.
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Add any other context, screenshots, or examples here.

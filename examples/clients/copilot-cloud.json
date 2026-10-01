@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "teletype": {
+      "type": "http",
+      "url": "https://mcp.teletype.app/mcp",
+      "headers": {
+        "X-Teletype-Api-Token": "$COPILOT_MCP_TELETYPE_API_TOKEN"
+      },
+      "tools": [
+        "find_conversations",
+        "lookup_client_profile",
+        "read_client_history",
+        "list_workspace_metadata",
+        "get_project_status",
+        "get_capabilities"
+      ]
+    }
+  }
+}
