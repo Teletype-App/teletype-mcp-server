@@ -3,14 +3,17 @@
   "manifest_version": "0.3",
   "name": "teletype-mcp-server",
   "display_name": "Teletype",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Work with Teletype conversations, customers, channels, and project settings from Claude Desktop.",
   "author": {
     "name": "Teletype",
     "url": "https://teletype.app"
   },
   "license": "MIT",
-  "privacy_policies": ["https://teletype.app/files/policy.pdf"],
+  "privacy_policies": [
+    "https://teletype.app/android/policy.html",
+    "https://teletype.app/files/policy.pdf"
+  ],
   "keywords": ["teletype", "customer support", "messaging"],
   "compatibility": {
     "platforms": ["darwin", "win32", "linux"],
@@ -39,5 +42,6 @@
     }
   },
   "tools_generated": true,
-  "prompts_generated": true
+  "prompts_generated": true,
+  "icon": "icon.png"
 }

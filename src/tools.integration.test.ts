@@ -1,5 +1,5 @@
 import request from "supertest";
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import type { Config } from "./config.js";
 import { createHttpApp } from "./http.js";
 import { startFakeTeletypeApi, type FakeTeletypeApi } from "./test-support/fake-teletype-api.js";
@@ -7,11 +7,12 @@ import { startFakeTeletypeApi, type FakeTeletypeApi } from "./test-support/fake-
 describe("Teletype tools against the Public API contract", () => {
   let fakeApi: FakeTeletypeApi;
   let app: ReturnType<typeof createHttpApp>;
+  let config: Config;
   let tokenSequence = 0;
 
   beforeAll(async () => {
     fakeApi = await startFakeTeletypeApi();
-    const config: Config = {
+    config = {
       transport: "http",
       port: 4311,
       host: "127.0.0.1",
@@ -30,12 +31,12 @@ describe("Teletype tools against the Public API contract", () => {
       readOnly: false,
       toolsets: null,
     };
-    app = createHttpApp(config);
   });
 
   afterAll(async () => fakeApi.close());
   beforeEach(() => {
     fakeApi.reset();
+    app = createHttpApp(config);
   });
 
   function record(value: unknown): Record<string, unknown> {
@@ -1101,18 +1102,12 @@ describe("Teletype tools against the Public API contract", () => {
     expect(tools.find((tool) => tool.name === "send_reply_to_client")?.writes_data).toBe(true);
     expect(res.disabled_tools).toEqual([]);
 
-    vi.stubEnv("TELETYPE_MCP_READ_ONLY", "true");
-    try {
-      const readOnly = await callTool("get_capabilities", {});
-      expect(readOnly.read_only).toBe(true);
-      expect(readOnly.disabled_tools).toContain("send_reply_to_client");
-      expect(readOnly.disabled_tools).toContain("resolve_conversation");
-      expect(readOnly.notes).toEqual(
-        expect.arrayContaining([expect.stringContaining("read-only")]),
-      );
-    } finally {
-      vi.unstubAllEnvs();
-    }
+    app = createHttpApp({ ...config, readOnly: true });
+    const readOnly = await callTool("get_capabilities", {});
+    expect(readOnly.read_only).toBe(true);
+    expect(readOnly.disabled_tools).toContain("send_reply_to_client");
+    expect(readOnly.disabled_tools).toContain("resolve_conversation");
+    expect(readOnly.notes).toEqual(expect.arrayContaining([expect.stringContaining("read-only")]));
 
     // The only Teletype contact is the cached project identity lookup.
     await callTool("get_capabilities", {});
@@ -1376,19 +1371,16 @@ describe("Teletype tools against the Public API contract", () => {
   });
 
   it("blocks mark_seen in read-only mode while still reading the thread", async () => {
-    vi.stubEnv("TELETYPE_MCP_READ_ONLY", "true");
-    try {
-      const res = await callTool("read_conversation_thread", {
-        dialog_id: "dialog-open",
-        mark_seen: true,
-        confirm: true,
-      });
-      expect(res.messages).toBeDefined();
-      expect(res.marked_seen).toBe(false);
-      expect(res.notices).toEqual([expect.stringContaining("read-only")]);
-    } finally {
-      vi.unstubAllEnvs();
-    }
+    app = createHttpApp({ ...config, readOnly: true });
+    const res = await callTool("read_conversation_thread", {
+      dialog_id: "dialog-open",
+      mark_seen: true,
+      confirm: true,
+    });
+    expect(res.messages).toBeDefined();
+    expect(res.marked_seen).toBe(false);
+    expect(res.notices).toEqual([expect.stringContaining("read-only")]);
+    expect(fakeApi.state.seenDialogs).not.toContain("dialog-open");
   });
 
   it("marks conversations as seen outside read-only mode", async () => {

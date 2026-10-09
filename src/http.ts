@@ -1,5 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 import type { Server as HttpServer } from "node:http";
+import { fileURLToPath } from "node:url";
 import express, { type NextFunction, type Request, type Response } from "express";
 import { toNodeHandler } from "@modelcontextprotocol/node";
 import { createMcpHandler } from "@modelcontextprotocol/server";
@@ -9,6 +10,8 @@ import { buildServer } from "./server.js";
 import { log } from "./log.js";
 import { RequestLimiter } from "./request-limiter.js";
 import { SERVER_VERSION } from "./version.js";
+import { mountProjectOAuth } from "./oauth.js";
+import { landingPage } from "./landing-page.js";
 
 const API_TOKEN_HEADER = "x-teletype-api-token";
 
@@ -27,7 +30,42 @@ export function createHttpApp(cfg: Config): express.Express {
     },
   );
   app.disable("x-powered-by");
+  app.use(
+    "/assets",
+    express.static(fileURLToPath(new URL("../plugin/assets/", import.meta.url)), {
+      dotfiles: "deny",
+      index: false,
+      redirect: false,
+      maxAge: "1d",
+      setHeaders: (res) => res.setHeader("X-Content-Type-Options", "nosniff"),
+    }),
+  );
+  app.get("/", (req, res) => {
+    const savedLocale = req.headers.cookie
+      ?.split(";")
+      .map((part) => part.trim())
+      .find((part) => part.startsWith("teletype_oauth_locale="))
+      ?.slice("teletype_oauth_locale=".length);
+    const locale =
+      savedLocale === "ru" || savedLocale === "en"
+        ? savedLocale
+        : req.acceptsLanguages("en", "ru") === "ru"
+          ? "ru"
+          : "en";
+    res
+      .set({
+        "Cache-Control": "no-store",
+        "Content-Language": locale,
+        "Referrer-Policy": "no-referrer",
+        "X-Content-Type-Options": "nosniff",
+        "Content-Security-Policy":
+          "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'",
+      })
+      .type("html")
+      .send(landingPage(cfg.publicBaseUrl, locale));
+  });
   app.use(express.json({ limit: "1mb", strict: true }));
+  const oauth = mountProjectOAuth(app, cfg);
 
   app.get(["/healthz", "/health", "/live"], (_req, res) => {
     res.json({ ok: true, service: "teletype-mcp-server", version: SERVER_VERSION });
@@ -50,8 +88,36 @@ export function createHttpApp(cfg: Config): express.Express {
     const requestId = randomUUID();
     const startedAt = performance.now();
     res.set("X-Request-Id", requestId);
-    const token = String(req.headers[API_TOKEN_HEADER] ?? "").trim();
+    let token = String(req.headers[API_TOKEN_HEADER] ?? "").trim();
+    let oauthReadOnly: boolean | undefined;
+    const challenge = () => {
+      if (oauth)
+        res.set(
+          "WWW-Authenticate",
+          `Bearer resource_metadata="${new URL("/.well-known/oauth-protected-resource/mcp", cfg.publicBaseUrl).href}"`,
+        );
+    };
+    if (oauth && req.headers.authorization) {
+      if (token) {
+        res.status(400).json({ error: "multiple_authentication_methods" });
+        return;
+      }
+      try {
+        const bearer = /^Bearer ([A-Za-z0-9_-]{43})$/i.exec(req.headers.authorization)?.[1];
+        if (!bearer) throw new Error("Invalid bearer token.");
+        const info = await oauth.verifyAccessToken(bearer);
+        if (typeof info.extra?.apiToken !== "string")
+          throw new Error("Missing project credential.");
+        token = info.extra.apiToken;
+        oauthReadOnly = !info.scopes.includes("write");
+      } catch {
+        challenge();
+        res.status(401).json({ error: "invalid_oauth_token" });
+        return;
+      }
+    }
     if (!token) {
+      challenge();
       res.status(401).json({
         error: "teletype_api_token_required",
         message: `Pass the Public API token in ${API_TOKEN_HEADER}.`,
@@ -79,6 +145,10 @@ export function createHttpApp(cfg: Config): express.Express {
           maxUploadBytes: cfg.maxUploadBytes,
           requestId,
           logLevel: cfg.logLevel,
+          toolPolicy: {
+            readOnly: cfg.readOnly || oauthReadOnly === true,
+            toolsets: cfg.toolsets,
+          },
         },
         () => nodeMcpHandler(req, res, req.body),
       );
@@ -126,7 +196,11 @@ export async function startHttpServer(cfg: Config): Promise<HttpServer> {
       if (error) reject(error);
       else resolve(server);
     });
+    server.once("close", () => app.emit("close"));
     server.once("error", reject);
+  }).catch((error: unknown) => {
+    app.emit("close");
+    throw error;
   });
   log("info", "http_server_started", { host: cfg.host, port: cfg.port });
   return listener;

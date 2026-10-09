@@ -1,0 +1,34 @@
+{
+  "name": "teletype",
+  "version": "0.1.1",
+  "description": "Teletype support tools and workflows: triage the inbox, send replies safely, summarize clients, escalate issues, hand over shifts.",
+  "author": {
+    "name": "Teletype-App",
+    "email": "p@teletype.app"
+  },
+  "repository": "https://github.com/Teletype-App/teletype-mcp-server",
+  "license": "MIT",
+  "keywords": ["mcp", "teletype", "customer-support", "messaging", "omnichat"],
+  "homepage": "https://github.com/Teletype-App/teletype-mcp-server/tree/main/plugin",
+  "mcpServers": {
+    "teletype": {
+      "url": "https://mcp.teletype.app/mcp",
+      "headers": {
+        "X-Teletype-Api-Token": "${TELETYPE_API_TOKEN}"
+      }
+    }
+  },
+  "variables": {
+    "type": "object",
+    "properties": {
+      "TELETYPE_API_TOKEN": {
+        "type": "string",
+        "title": "Teletype Public API token",
+        "description": "Public API token from your Teletype project settings. Sent to https://mcp.teletype.app/mcp.",
+        "minLength": 1
+      }
+    },
+    "required": ["TELETYPE_API_TOKEN"]
+  },
+  "logo": "assets/logo.svg"
+}

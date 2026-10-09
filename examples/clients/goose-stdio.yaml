@@ -1,0 +1,13 @@
+extensions:
+  teletype:
+    name: teletype
+    type: stdio
+    enabled: true
+    cmd: npx
+    args:
+      - -y
+      - teletype-mcp-server
+      - --stdio
+    envs:
+      TELETYPE_API_TOKEN: your-teletype-public-api-token
+    timeout: 300

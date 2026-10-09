@@ -1,0 +1,19 @@
+{
+  "name": "teletype-mcp-server",
+  "owner": {
+    "name": "Teletype-App",
+    "email": "p@teletype.app"
+  },
+  "metadata": {
+    "description": "Teletype customer support tools, workflows, and MCP integration for Cursor."
+  },
+  "plugins": [
+    {
+      "name": "teletype",
+      "source": "plugin",
+      "description": "Teletype support tools and workflows: triage the inbox, send replies safely, summarize clients, escalate issues, hand over shifts.",
+      "version": "0.1.1",
+      "category": "mcp"
+    }
+  ]
+}

@@ -2,6 +2,12 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { parseCliArgs, runDoctor } from "./index.js";
 
+const packageVersion = (
+  JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")) as {
+    version: string;
+  }
+).version;
+
 describe("CLI Argument Parser", () => {
   it("handles --help and -h flags", () => {
     const res1 = parseCliArgs(["--help"], {});
@@ -16,11 +22,11 @@ describe("CLI Argument Parser", () => {
   it("handles --version and -v flags", () => {
     const res1 = parseCliArgs(["--version"], {});
     expect(res1.exitImmediately).toBe(true);
-    expect(res1.output).toBe("0.1.0");
+    expect(res1.output).toBe(packageVersion);
 
     const res2 = parseCliArgs(["-v"], {});
     expect(res2.exitImmediately).toBe(true);
-    expect(res2.output).toBe("0.1.0");
+    expect(res2.output).toBe(packageVersion);
   });
 
   it("sets TRANSPORT to stdio for --stdio and -s", () => {

@@ -6,6 +6,52 @@ const packageJson = JSON.parse(readFileSync(new URL("../package.json", import.me
 const registryJson = JSON.parse(readFileSync(new URL("../server.json", import.meta.url), "utf8"));
 const expectedTag = `v${packageJson.version}`;
 const actualTag = process.env.GITHUB_REF_NAME;
+const lockfile = JSON.parse(readFileSync(new URL("../package-lock.json", import.meta.url), "utf8"));
+
+if (
+  lockfile.version !== packageJson.version ||
+  lockfile.packages?.[""]?.version !== packageJson.version
+) {
+  console.error("Lockfile versions must match the package version.");
+  process.exitCode = 1;
+}
+
+for (const file of [
+  "mcpb/manifest.json",
+  "plugin/plugin.json",
+  "plugin/.claude-plugin/plugin.json",
+  "plugin/.cursor-plugin/plugin.json",
+  "lhm.plugin.json",
+  "gemini-extension.json",
+]) {
+  const manifest = JSON.parse(readFileSync(new URL(`../${file}`, import.meta.url), "utf8"));
+  if (manifest.version !== packageJson.version) {
+    console.error(`${file} version ${manifest.version} must match package ${packageJson.version}.`);
+    process.exitCode = 1;
+  }
+}
+
+for (const file of [".claude-plugin/marketplace.json", ".cursor-plugin/marketplace.json"]) {
+  const marketplace = JSON.parse(readFileSync(new URL(`../${file}`, import.meta.url), "utf8"));
+  const plugin = marketplace.plugins.find((entry) => entry.name === "teletype");
+  if (plugin?.version !== packageJson.version) {
+    console.error(`${file} must include Teletype at version ${packageJson.version}.`);
+    process.exitCode = 1;
+  }
+}
+
+const pinnedPackage = `${packageJson.name}@${packageJson.version}`;
+const pluginMcp = JSON.parse(readFileSync(new URL("../plugin/mcp.json", import.meta.url), "utf8"));
+if (!pluginMcp.mcpServers.teletype.args.includes(pinnedPackage)) {
+  console.error(`The portable plugin launcher must pin ${pinnedPackage}.`);
+  process.exitCode = 1;
+}
+
+const smitheryConfig = readFileSync(new URL("../smithery.yaml", import.meta.url), "utf8");
+if (!smitheryConfig.includes(`'${pinnedPackage}'`)) {
+  console.error(`The legacy Smithery launcher must pin ${pinnedPackage}.`);
+  process.exitCode = 1;
+}
 
 if (
   registryJson.name !== packageJson.mcpName ||
@@ -31,6 +77,8 @@ if (actualTag !== expectedTag) {
     );
     process.exitCode = 1;
   } else if (!process.exitCode) {
-    console.log(`Release ${actualTag} matches package, registry, and built CLI versions.`);
+    console.log(
+      `Release ${actualTag} matches package, registry, plugins, MCPB, and built CLI versions.`,
+    );
   }
 }

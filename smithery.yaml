@@ -1,5 +1,6 @@
 # Smithery configuration for Teletype MCP Server
-# https://smithery.ai/docs/config#smitheryyaml
+# Legacy stdio configuration. Current publishing uses the MCPB bundle.
+# See https://smithery.ai/docs/build/publish
 
 startCommand:
   type: stdio
@@ -14,7 +15,7 @@ startCommand:
   commandFunction: |
     (config) => ({
       command: 'npx',
-      args: ['-y', 'teletype-mcp-server', '--stdio'],
+      args: ['-y', 'teletype-mcp-server@0.1.1', '--stdio'],
       env: {
         TELETYPE_API_TOKEN: config.teletypeApiToken
       }

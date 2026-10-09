@@ -1,17 +1,37 @@
 {
   "name": "teletype",
   "displayName": "Teletype MCP Server",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Teletype support tools and workflows: triage the inbox, send replies safely, summarize clients, escalate issues, hand over shifts.",
-  "author": { "name": "Teletype-App", "url": "https://github.com/Teletype-App" },
+  "author": {
+    "name": "Teletype-App",
+    "url": "https://github.com/Teletype-App",
+    "email": "p@teletype.app"
+  },
   "repository": "https://github.com/Teletype-App/teletype-mcp-server",
   "license": "MIT",
-  "keywords": ["mcp", "teletype", "support", "omnichat"],
+  "keywords": ["mcp", "teletype", "customer-support", "messaging", "omnichat"],
   "mcpServers": {
     "teletype": {
       "type": "http",
       "url": "https://mcp.teletype.app/mcp",
-      "headers": { "X-Teletype-Api-Token": "${TELETYPE_API_TOKEN}" }
+      "headers": {
+        "X-Teletype-Api-Token": "${user_config.teletype_api_token}"
+      }
     }
-  }
+  },
+  "homepage": "https://github.com/Teletype-App/teletype-mcp-server/tree/main/plugin",
+  "userConfig": {
+    "teletype_api_token": {
+      "type": "string",
+      "title": "Teletype Public API token",
+      "description": "Public API token from your Teletype project settings. Sent only to the hosted Teletype MCP server.",
+      "required": true,
+      "sensitive": true
+    }
+  },
+  "icon": "./assets/icon.png",
+  "documentationUrl": "https://github.com/Teletype-App/teletype-mcp-server/tree/main/plugin",
+  "supportUrl": "https://help.teletype.app",
+  "privacyPolicyUrl": "https://teletype.app/files/policy.pdf"
 }

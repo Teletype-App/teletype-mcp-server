@@ -1,11 +1,18 @@
 import request from "supertest";
 import { Client, StreamableHTTPClientTransport } from "@modelcontextprotocol/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { readFileSync } from "node:fs";
 import type { Server as HttpServer } from "node:http";
 import type { Express } from "express";
 import type { Config } from "./config.js";
 import { createHttpApp } from "./http.js";
 import { TOOL_REGISTRY } from "./tools.js";
+
+const packageVersion = (
+  JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")) as {
+    version: string;
+  }
+).version;
 
 const config: Config = {
   transport: "http",
@@ -223,9 +230,13 @@ describe("HTTP transport", () => {
   it.each([
     ["2025-11-25", "legacy"],
     ["2026-07-28", "modern"],
-  ] as const)("serves the %s protocol with the SDK client", async (version, era) => {
+  ] as const)("serves the %s protocol with configured read-only toolsets", async (version, era) => {
     const listener: HttpServer = await new Promise((resolve) => {
-      const server = createHttpApp(config).listen(0, "127.0.0.1", () => {
+      const server = createHttpApp({
+        ...config,
+        readOnly: true,
+        toolsets: ["conversations"],
+      }).listen(0, "127.0.0.1", () => {
         resolve(server);
       });
     });
@@ -255,6 +266,21 @@ describe("HTTP transport", () => {
       expect(client.getNegotiatedProtocolVersion()).toBe(version);
       const listed = await client.listTools();
       expect(listed.tools.some((tool) => tool.name === "find_conversations")).toBe(true);
+      expect(listed.tools.some((tool) => tool.name === "send_reply_to_client")).toBe(false);
+      expect(listed.tools.some((tool) => tool.name === "list_workspace_metadata")).toBe(false);
+      await expect(
+        client.callTool({
+          name: "send_reply_to_client",
+          arguments: {
+            recipient_dialog_id: "dialog",
+            text: "Blocked reply",
+            confirm: true,
+            dry_run: true,
+          },
+        }),
+      ).rejects.toMatchObject({
+        code: -32602,
+      });
       const result = await client.callTool({ name: "find_conversations", arguments: {} });
       expect(result.isError).not.toBe(true);
       expect(result.structuredContent).toMatchObject({ total_returned: 0, dialogs: [] });
@@ -306,7 +332,7 @@ describe("HTTP transport", () => {
       expect(response.body).toEqual({
         ok: true,
         service: "teletype-mcp-server",
-        version: "0.1.0",
+        version: packageVersion,
       });
     }
   });

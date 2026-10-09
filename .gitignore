@@ -10,4 +10,8 @@ coverage/
 reports/
 .stryker-tmp/
 artifacts/
+*.sqlite
+*.sqlite-*
+*.db
+*.db-*
 eval-results/raw/

@@ -27,6 +27,10 @@ export default tseslint.config(
     languageOptions: { globals: globals.node },
   },
   {
+    files: ["plugin/assets/consent.js", "plugin/assets/landing.js"],
+    languageOptions: { globals: globals.browser },
+  },
+  {
     files: [
       "src/teletype-api.ts",
       "src/entity-resolver.ts",

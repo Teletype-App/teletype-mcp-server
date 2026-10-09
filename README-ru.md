@@ -10,6 +10,10 @@ MCP-сервер для [Teletype](https://teletype.app). Его инструм�
 
 ## Быстрый старт
 
+[![Install in Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/link/mcp/install?name=teletype&config=eyJ1cmwiOiJodHRwczovL21jcC50ZWxldHlwZS5hcHAvbWNwIiwiaGVhZGVycyI6eyJYLVRlbGV0eXBlLUFwaS1Ub2tlbiI6IiR7ZW52OlRFTEVUWVBFX0FQSV9UT0tFTn0ifX0%3D) [![Install in VS Code](https://img.shields.io/badge/Install_in-VS_Code-0098FF)](https://insiders.vscode.dev/redirect?url=vscode%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522teletype%2522%252C%2522type%2522%253A%2522http%2522%252C%2522url%2522%253A%2522https%253A%252F%252Fmcp.teletype.app%252Fmcp%2522%252C%2522headers%2522%253A%257B%2522X-Teletype-Api-Token%2522%253A%2522%2524%257Binput%253Ateletype-api-token%257D%2522%257D%252C%2522inputs%2522%253A%255B%257B%2522type%2522%253A%2522promptString%2522%252C%2522id%2522%253A%2522teletype-api-token%2522%252C%2522description%2522%253A%2522Teletype%2520Public%2520API%2520token%2522%252C%2522password%2522%253Atrue%257D%255D%257D)
+
+VS Code запросит токен проекта при подключении. Для Cursor заранее задайте `TELETYPE_API_TOKEN` в окружении приложения. Подробности в [инструкции клиентов](docs/ru/CLIENTS.md#cursor).
+
 **Хостед-сервер (основной способ).** Teletype запускает MCP-сервер по адресу `https://mcp.teletype.app/mcp`. Для подключения нужен Public API токен проекта. Локальная установка не требуется. В Claude Code:
 
 ```bash
@@ -31,7 +35,7 @@ claude mcp add --transport http teletype https://mcp.teletype.app/mcp \
 }
 ```
 
-Для Claude Code и Codex есть плагины, которые ставят сервер и скилл `teletype-support` одним шагом. См. [Плагины для Claude Code и Codex](#плагины-для-claude-code-и-codex).
+Для Claude Code и Codex есть плагины, которые ставят сервер и скилл `teletype-support` одним шагом. См. [Плагины для Claude Code, Codex и Cursor](#плагины-для-claude-code-codex-и-cursor).
 
 **Локальный запуск.** Пользователи Claude Desktop на macOS и Windows могут скачать `.mcpb` из [релизов проекта](https://github.com/Teletype-App/teletype-mcp-server/releases), открыть его и ввести токен Teletype Public API. Для запуска из исходного кода выполните `npm ci && npm run build`, затем подключите в MCP-клиенте команду `node /absolute/path/to/dist/index.js --stdio` с переменной окружения `TELETYPE_API_TOKEN`.
 
@@ -62,7 +66,7 @@ TELETYPE_API_TOKEN=ваш-токен npx -y teletype-mcp-server doctor --stdio
 
 Для Cursor, VS Code с Copilot, Codex, Claude Code, OpenCode, Antigravity CLI и других клиентов есть [инструкции по подключению MCP](docs/ru/CLIENTS.md). Примеры охватывают хостед HTTP и локальный stdio. Отдельный OpenAI-совместимый endpoint нужен только для необязательной команды `eval:model`.
 
-Для Claude Code и Codex есть плагины, которые ставят сервер, скилл `teletype-support` и поддержечные слэш-команды одним шагом. См. [Плагины для Claude Code и Codex](#плагины-для-claude-code-и-codex).
+Для Claude Code и Codex есть плагины, которые ставят сервер, скилл `teletype-support` и поддержечные слэш-команды одним шагом. См. [Плагины для Claude Code, Codex и Cursor](#плагины-для-claude-code-codex-и-cursor).
 
 ## Возможности
 
@@ -117,20 +121,24 @@ TELETYPE_API_TOKEN=ваш-токен npx -y teletype-mcp-server doctor --stdio
 - `teletype://dialogs/{dialogId}`: полная переписка конкретного диалога по его ID.
 - `teletype://clients/{clientId}`: профиль клиента, теги и заметки по ID клиента.
 
-## Плагины для Claude Code и Codex
+## Плагины для Claude Code, Codex и Cursor
 
-Репозиторий работает как маркетплейс плагинов для обоих клиентов, и один каталог `plugin/` обслуживает оба формата: `.claude-plugin/plugin.json` плюс `commands/` для Claude Code, переносимые манифесты [Agent Plugins](https://agent-plugins.org) `plugin.json` и `mcp.json` для Codex и общий [skills/teletype-support](plugin/skills/teletype-support/SKILL.md).
+Репозиторий содержит маркетплейсы Claude Code, Codex и Cursor. Каталог `plugin/` объединяет манифесты `.claude-plugin/plugin.json` и `.cursor-plugin/plugin.json`, переносимые манифесты [Agent Plugins](https://agent-plugins.org) `plugin.json` и `mcp.json`, общий [скилл поддержки](plugin/skills/teletype-support/SKILL.md) и команды. Настройка и доступ к данным описаны в [README плагина](plugin/README.md).
 
 ### Claude Code
 
-Плагин объединяет хостед-сервер (`https://mcp.teletype.app/mcp`, авторизация заголовком `X-Teletype-Api-Token`, подставляемым из `TELETYPE_API_TOKEN`), скилл `teletype-support` с регламентами поддержки и пять слэш-команд, повторяющих MCP-промпты сервера: `/triage-inbox`, `/draft-reply`, `/client-summary`, `/escalate-issue`, `/shift-handover`.
+Плагин объединяет хостед-сервер (`https://mcp.teletype.app/mcp`, авторизация заголовком `X-Teletype-Api-Token`, подставляемым из секретного поля настройки плагина), скилл `teletype-support` с регламентами поддержки и пять слэш-команд, повторяющих MCP-промпты сервера: `/triage-inbox`, `/draft-reply`, `/client-summary`, `/escalate-issue`, `/shift-handover`.
 
 ```bash
 /plugin marketplace add Teletype-App/teletype-mcp-server
 /plugin install teletype@teletype-mcp-server
 ```
 
-Экспортируйте `TELETYPE_API_TOKEN` в оболочке перед запуском Claude Code: сервер из плагина наследует его от процесса клиента. Скилл несёт многошаговые регламенты, которым не место в описаниях инструментов: порядок разбора очереди, dry-run перед неоднозначной отправкой, получение категории перед закрытием. Он срабатывает на задачах поддержки без всякой слэш-команды. Те же пять сценариев существуют как MCP-промпты для клиентов, которые их показывают. Команды закрывают сессии, где промптов не видно.
+При включении плагина введите токен в поле **Teletype Public API token**. Поле `userConfig` обязательное и секретное: Claude хранит значение в защищённом хранилище и подставляет его в заголовок. Используйте актуальную версию Claude Code с поддержкой `userConfig`. Скилл несёт многошаговые регламенты, которым не место в описаниях инструментов: порядок разбора очереди, dry-run перед неоднозначной отправкой, получение категории перед закрытием. Он срабатывает на задачах поддержки без всякой слэш-команды. Те же пять сценариев существуют как MCP-промпты для клиентов, которые их показывают. Команды закрывают сессии, где промптов не видно.
+
+### Cursor
+
+Нативный манифест Cursor подключает хостед-сервер, общий скилл и команды. В маркетплейс-установке задайте `TELETYPE_API_TOKEN` через **Plugins → Configure**. Для подключения напрямую без плагина используйте [инструкцию Cursor](docs/ru/CLIENTS.md#cursor).
 
 ### Codex
 
@@ -151,6 +159,14 @@ env_http_headers = { "X-Teletype-Api-Token" = "TELETYPE_API_TOKEN" }
 Без плагинов Codex читает скиллы из `.agents/skills` в репозитории или из `~/.agents/skills` на уровне пользователя.
 
 ### Другие агенты
+
+Установите скилл поддержки через [Skills CLI](https://github.com/vercel-labs/skills):
+
+```bash
+npx skills add Teletype-App/teletype-mcp-server --skill teletype-support
+```
+
+При запросе выберите своего агента и область установки. Команда устанавливает инструкции для работы с поддержкой. Сам MCP-сервер подключите отдельно по [инструкции клиента](docs/ru/CLIENTS.md).
 
 Скилл использует открытый формат [Agent Skills](https://agentskills.io), который поддерживают OpenCode, Cursor, Gemini CLI, GitHub Copilot, Goose и другие. npm-пакет поставляет скилл, поэтому после обычной установки:
 
@@ -225,7 +241,9 @@ TRANSPORT=stdio TELETYPE_API_TOKEN=... npm start
 X-Teletype-Api-Token: <token>
 ```
 
-Не передавайте токен Teletype в `Authorization`. HTTP-транспорт использует `X-Teletype-Api-Token` как единственный ключ доступа к проекту. Отдельных учётных записей и прав в MCP-сервере нет. Для удалённого доступа нужен HTTPS. Любой, у кого есть токен, сможет работать с проектом через MCP-сервер.
+Не передавайте токен проекта Teletype в `Authorization`. Для удалённого доступа нужен HTTPS. Владелец токена сможет работать с данными проекта через MCP с учётом ограничений сервера.
+
+На публичном сервере `https://mcp.teletype.app/mcp` OAuth выключен. Для подключения передавайте токен проекта в `X-Teletype-Api-Token`. В коде сохранён опциональный [OAuth](docs/ru/OAUTH.md) для собственного сервера. По умолчанию он отключён и требует отдельной настройки.
 
 ```bash
 TRANSPORT=http HOST=127.0.0.1 PORT=4311 npm start
@@ -233,10 +251,12 @@ TRANSPORT=http HOST=127.0.0.1 PORT=4311 npm start
 
 Маршруты HTTP:
 
-| Метод | Путь       | Назначение                                    |
-| ----- | ---------- | --------------------------------------------- |
-| POST  | `/mcp`     | MCP через Streamable HTTP без хранения сеанса |
-| GET   | `/healthz` | Проверка доступности сервера                  |
+| Метод | Путь        | Назначение                                    |
+| ----- | ----------- | --------------------------------------------- |
+| GET   | `/`         | Лендинг на русском и английском               |
+| GET   | `/assets/*` | Скрипты, стили, логотип и шрифты лендинга     |
+| POST  | `/mcp`      | MCP через Streamable HTTP без хранения сеанса |
+| GET   | `/healthz`  | Проверка доступности сервера                  |
 
 Для каждого HTTP-запроса создаётся отдельная пара MCP Server/transport, поэтому одновременные арендаторы не делят ответы и контекст. Сервер ограничивает число параллельных запросов глобально и для каждого токена. При превышении лимита он отвечает `429` с `Retry-After`. Через HTTP сервер не читает локальные файлы.
 
@@ -253,6 +273,15 @@ docker run --rm -p 127.0.0.1:4311:4311 \
 
 Для публичного домена укажите его источник (origin) в `PUBLIC_BASE_URL` и настройте HTTPS на обратном прокси.
 
+Для MCP-клиента, который запускает контейнер через stdio, соберите target `stdio` и передайте токен из своего приватного окружения. Флаг `-i` оставляет stdin открытым. Флаг `-t` мешает обмену MCP-сообщениями, поэтому его не добавляйте:
+
+```bash
+docker build --target stdio -t teletype-mcp-stdio .
+docker run --rm -i -e TELETYPE_API_TOKEN teletype-mcp-stdio
+```
+
+Вариант stdio запускается от того же непривилегированного пользователя, не открывает HTTP-порт и не использует HTTP health check. Переменная `TELETYPE_MCP_READ_ONLY=true` отключает пишущие инструменты.
+
 ## Конфигурация
 
 | Переменная                    | Значение по умолчанию                    |
@@ -261,6 +290,9 @@ docker run --rm -p 127.0.0.1:4311:4311 \
 | `HOST` / `PORT`               | `127.0.0.1` / `4311`                     |
 | `PUBLIC_BASE_URL`             | `http://127.0.0.1:4311`                  |
 | `ALLOWED_ORIGINS`             | дополнительные Origin через запятую      |
+| `OAUTH_ENABLED`               | `false`                                  |
+| `OAUTH_DB_PATH`               | путь к постоянной SQLite-базе для OAuth  |
+| `OAUTH_ENCRYPTION_KEY`        | приватный ключ OAuth из 64 hex-символов  |
 | `TELETYPE_API_TOKEN`          | обязателен для stdio                     |
 | `TELETYPE_API_BASE`           | `https://api.teletype.app/public/api/v1` |
 | `TELETYPE_PROJECT_URL`        | `teletype.app`                           |
@@ -342,3 +374,9 @@ npm run eval:model > eval-report.json
 `npm run test:mutation` запускает полную мутационную проверку с нижним порогом 33% и сохраняет отчёты в `reports/mutation/`. Она занимает больше времени и не входит в `npm run check`.
 
 О раскрытии уязвимостей читайте в [SECURITY-ru.md](docs/ru/SECURITY.md), об участии в разработке в [CONTRIBUTING-ru.md](docs/ru/CONTRIBUTING.md). Лицензия проекта: MIT.
+
+## Поддержка и конфиденциальность
+
+- [Центр помощи Teletype](https://help.teletype.app)
+- [Сообщить о проблеме сервера](https://github.com/Teletype-App/teletype-mcp-server/issues)
+- [Политика конфиденциальности Teletype](https://teletype.app/files/policy.pdf)

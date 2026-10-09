@@ -57,6 +57,8 @@ try {
     await copyFile(join(root, file), join(staging, file));
   }
   await copyFile(join(root, "mcpb/manifest.json"), join(staging, "manifest.json"));
+  await copyFile(join(root, "plugin/assets/icon.png"), join(staging, "icon.png"));
+  await cp(join(root, "plugin/assets"), join(staging, "plugin/assets"), { recursive: true });
   await run(npm, ["ci", "--omit=dev", "--ignore-scripts", "--no-audit", "--no-fund"], staging);
   await run(process.execPath, ["dist/index.js", "doctor", "--stdio"], staging, {
     ...process.env,

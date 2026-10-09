@@ -1,6 +1,6 @@
 ---
 name: teletype-support
-description: Support workflows for the Teletype MCP server: triage the unanswered inbox, draft and send replies safely, summarize clients, escalate issues, and prepare shift handovers. Use when the task mentions Teletype conversations, the support queue, operator work, or client follow-up.
+description: "Support workflows for the Teletype MCP server: triage the unanswered inbox, draft and send replies safely, summarize clients, escalate issues, and prepare shift handovers. Use when the task mentions Teletype conversations, the support queue, operator work, or client follow-up."
 ---
 
 # Teletype support workflows
@@ -8,6 +8,8 @@ description: Support workflows for the Teletype MCP server: triage the unanswere
 Regulations for working with a Teletype support project through its MCP tools. Each tool's parameters live in its own schema. This skill covers the order of steps and the safety rules.
 
 ## Before any work
+
+If Teletype tools are absent, read [connection instructions](references/installation.md) and help the user configure the MCP server. Installing this skill alone does not connect a project. Never request the project token in chat.
 
 1. If the tool list looks unexpected or a call fails with a policy error, call `get_capabilities` once. It reports the project identity, read-only mode, and active toolsets.
 2. Read tools (`find_conversations`, `find_messages`, `list_clients`, `lookup_client_profile`, `read_conversation_thread`, `read_client_history`, `list_workspace_metadata`, `get_project_status`) are safe to call whenever the task needs them. For old message text, continue `find_messages` through pages while `has_more` is true.

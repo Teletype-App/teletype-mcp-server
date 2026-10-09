@@ -1,4 +1,5 @@
 import { AsyncLocalStorage } from "node:async_hooks";
+import type { ToolPolicy } from "./tool-policy.js";
 
 export interface RequestContext {
   authToken: string;
@@ -12,6 +13,7 @@ export interface RequestContext {
   requestId: string;
   logLevel: "debug" | "info" | "warn" | "error";
   signal?: AbortSignal;
+  toolPolicy?: ToolPolicy;
 }
 
 export function resolveLogContext(): Pick<RequestContext, "requestId" | "logLevel"> {

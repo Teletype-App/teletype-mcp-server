@@ -1,6 +1,8 @@
 {
   "$schema": "https://unpkg.com/knip@latest/schema.json",
   "entry": [
+    "plugin/assets/consent.js",
+    "plugin/assets/landing.js",
     "scripts/aggregate-week.mjs",
     "scripts/extract-week.mjs",
     "scripts/run-terminal-eval.mjs",

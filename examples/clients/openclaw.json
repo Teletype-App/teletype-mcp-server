@@ -1,0 +1,13 @@
+{
+  "mcp": {
+    "servers": {
+      "teletype": {
+        "url": "https://mcp.teletype.app/mcp",
+        "transport": "streamable-http",
+        "headers": {
+          "X-Teletype-Api-Token": "${TELETYPE_API_TOKEN}"
+        }
+      }
+    }
+  }
+}

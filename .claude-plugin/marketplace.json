@@ -7,7 +7,7 @@
       "name": "teletype",
       "source": "./plugin",
       "description": "Teletype MCP server with the teletype-support skill and support slash commands for Claude Code",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "author": { "name": "Teletype-App" },
       "license": "MIT",
       "keywords": ["mcp", "teletype", "support", "omnichat"],

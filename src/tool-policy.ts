@@ -5,6 +5,7 @@ import {
   type ToolName,
   type ToolsetName,
 } from "./tool-catalog.js";
+import { requestContext } from "./request-context.js";
 
 export const TOOLSETS = TOOLSET_NAMES;
 export type { ToolsetName };
@@ -38,6 +39,8 @@ export function parseToolsetList(value: string | undefined): ToolsetName[] | nul
 }
 
 export function loadToolPolicy(env: NodeJS.ProcessEnv = process.env): ToolPolicy {
+  const scopedPolicy = requestContext.getStore()?.toolPolicy;
+  if (scopedPolicy) return scopedPolicy;
   return {
     readOnly: env.TELETYPE_MCP_READ_ONLY === "true",
     toolsets: parseToolsetList(env.TELETYPE_MCP_TOOLSETS),
@@ -50,6 +53,8 @@ export function inspectToolPolicy(env: NodeJS.ProcessEnv = process.env): {
   policy: ToolPolicy;
   notes: string[];
 } {
+  const scopedPolicy = requestContext.getStore()?.toolPolicy;
+  if (scopedPolicy) return { policy: scopedPolicy, notes: [] };
   const notes: string[] = [];
   let toolsets: ToolsetName[] | null = null;
   try {

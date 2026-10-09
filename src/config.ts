@@ -20,6 +20,7 @@ export interface Config {
   logLevel: "debug" | "info" | "warn" | "error";
   readOnly: boolean;
   toolsets: ToolsetName[] | null;
+  oauth?: { databasePath: string; encryptionKey: string };
 }
 
 function integer(value: string | undefined, fallback: number, name: string): number {
@@ -56,6 +57,24 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     .map((item) => item.trim())
     .filter(Boolean);
   const allowedOrigins = [...new Set([origin(publicBaseUrl), ...configuredOrigins.map(origin)])];
+  let oauth: Config["oauth"];
+  if (env.OAUTH_ENABLED === "true") {
+    const issuer = new URL(publicBaseUrl);
+    if (
+      issuer.protocol !== "https:" &&
+      !["localhost", "127.0.0.1", "[::1]"].includes(issuer.hostname)
+    ) {
+      throw new Error("OAuth requires HTTPS, except on a loopback host.");
+    }
+    if (issuer.username || issuer.password) {
+      throw new Error("OAuth public URL must not contain credentials.");
+    }
+    const encryptionKey = env.OAUTH_ENCRYPTION_KEY;
+    if (!env.OAUTH_DB_PATH || !encryptionKey || !/^[a-f0-9]{64}$/i.test(encryptionKey)) {
+      throw new Error("OAuth requires OAUTH_DB_PATH and a 64-character hex OAUTH_ENCRYPTION_KEY.");
+    }
+    oauth = { databasePath: env.OAUTH_DB_PATH, encryptionKey };
+  }
   const projectUrl = env.TELETYPE_PROJECT_URL || "teletype.app";
   if (!/^[a-z0-9.-]+(?::\d+)?$/i.test(projectUrl)) {
     throw new Error("TELETYPE_PROJECT_URL must be a hostname with an optional port.");
@@ -66,6 +85,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     port: integer(env.PORT, 4311, "PORT"),
     host: env.HOST || "127.0.0.1",
     publicBaseUrl,
+    oauth,
     allowedOrigins,
     apiToken: env.TELETYPE_API_TOKEN?.trim() || undefined,
     apiBase: httpUrl(

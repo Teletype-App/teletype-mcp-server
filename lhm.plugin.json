@@ -1,0 +1,1408 @@
+{
+  "author": "Teletype-App",
+  "authorUrl": "https://github.com/Teletype-App",
+  "description": "MCP server for Teletype customer support: conversations, customer profiles, replies, and workspace tools.",
+  "homepage": "https://teletype.app",
+  "identifier": "teletype-app-teletype-mcp-server",
+  "name": "Teletype",
+  "prompts": [
+    {
+      "name": "triage-inbox",
+      "description": "Triage unanswered Teletype conversations by urgency and suggest the operator's next actions.",
+      "arguments": [
+        {
+          "name": "channel_id",
+          "description": "Optional channel ID to limit the queue.",
+          "required": false
+        },
+        {
+          "name": "limit",
+          "description": "How many dialogs to load for analysis (default 10).",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "draft-reply",
+      "description": "Read the client's conversation and draft a clear, polite reply in the requested tone.",
+      "arguments": [
+        {
+          "name": "dialog_id",
+          "description": "Teletype conversation ID for the response.",
+          "required": true
+        },
+        {
+          "name": "instructions",
+          "description": "Extra instructions for the reply, such as 'refund approved, offer a 10% discount'.",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "client-summary",
+      "description": "Summarize a client's contact details, tags, notes, recent conversations, and sentiment.",
+      "arguments": [
+        {
+          "name": "client",
+          "description": "Name, phone, email or client ID to search.",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "escalate-issue",
+      "description": "Create a structured bug report or escalation from a client conversation.",
+      "arguments": [
+        {
+          "name": "dialog_id",
+          "description": "ID of the dialog with the problem message.",
+          "required": true
+        },
+        {
+          "name": "component",
+          "description": "Component or service (for example, 'Payment', 'Mobile application', 'CRM integration').",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "shift-handover",
+      "description": "Prepare a support shift handover with unanswered conversations, channel issues, team availability, and project warnings.",
+      "arguments": [
+        {
+          "name": "channel_id",
+          "description": "Channel ID for focus check (optional).",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "name": "Teletype Workspace Metadata",
+      "uri": "teletype://workspace/metadata",
+      "description": "Teletype Project Directory: channels, tags, categories, templates, operators and groups.",
+      "mimeType": "application/json"
+    },
+    {
+      "name": "Teletype Project Status",
+      "uri": "teletype://project/status",
+      "description": "Teletype project status summary: balance, operator availability and API errors.",
+      "mimeType": "application/json"
+    },
+    {
+      "name": "Teletype Unanswered Dialogs",
+      "uri": "teletype://dialogs/unanswered",
+      "description": "The current queue of unanswered customer requests with links to conversations.",
+      "mimeType": "application/json"
+    },
+    {
+      "name": "Teletype Dialog Thread",
+      "uriTemplate": "teletype://dialogs/{dialogId}",
+      "description": "History of Teletype dialog messages by dialog ID.",
+      "mimeType": "application/json"
+    },
+    {
+      "name": "Teletype Client Profile",
+      "uriTemplate": "teletype://clients/{clientId}",
+      "description": "Teletype client profile (contacts, tags, notes) by client ID.",
+      "mimeType": "application/json"
+    }
+  ],
+  "tags": ["customer-support", "messaging", "teletype", "mcp"],
+  "tools": [
+    {
+      "name": "find_conversations",
+      "title": "Find conversations",
+      "description": "Find Teletype conversations by status (open/close/unanswered/all), channel, client, tags, operator, category, last message text, or client name. The query parameter searches last message text or client name, not dialog IDs. If the user already supplied dialog_id, pass it directly to read_conversation_thread, resolve_conversation, or send_reply_to_client as appropriate. For text in older messages use find_messages and continue through pages. Each result includes link_to_dialog. Show every conversation to the user as a clickable Markdown link. Use this tool for the active queue, unanswered conversations, a client's history, or tagged cases. For several dialogs of one client, prefer read_client_history.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["unanswered", "open", "close", "all"],
+            "description": "Filter by status. Default is 'open'. Use 'unanswered' for triage."
+          },
+          "channel": {
+            "type": "string",
+            "description": "Channel name (eg 'WhatsApp Sales') or its type (telegram, whatsapp_teletype, email, vk, viber, instagram_direct_business, etc.). Resolves automatically."
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Client tag names. All listed tags must match. For example, ['VIP', 'refund']."
+          },
+          "operator": {
+            "type": "string",
+            "description": "Agent name (full or partial) or 'unassigned' string for dialogs without an assigned agent."
+          },
+          "client": {
+            "type": "string",
+            "description": "Name, phone, email or client_id - filter by client."
+          },
+          "category": {
+            "type": "string",
+            "description": "Conversation category name. List available categories with list_workspace_metadata(resource='categories')."
+          },
+          "query": {
+            "type": "string",
+            "description": "Search query based on the text of the last message or client name (case-insensitive substring search)."
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "description": "Maximum number of conversations to return. Default: 20. Allowed range is 1 to 100."
+          },
+          "channel_type": {
+            "type": "string",
+            "description": "Channel type for filtering (for example: telegram, whatsapp_teletype, email, vk, viber, instagram_direct_business, etc.)."
+          },
+          "page": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Results page number (default 1). Pages beyond the last one return an empty list."
+          },
+          "response_format": {
+            "type": "string",
+            "enum": ["concise", "detailed"],
+            "description": "'concise' (default) keeps the text output short. 'detailed' adds per-item fields to the text output (ids, statuses, timestamps, full message texts). structuredContent always contains every field regardless of this parameter."
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "total_returned": {
+            "type": "integer"
+          },
+          "search_truncated": {
+            "type": "boolean"
+          },
+          "has_more": {
+            "type": "boolean"
+          },
+          "next_page_hint": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "notices": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "defaults_applied": {
+            "type": "object"
+          },
+          "resolved": {
+            "type": "object"
+          },
+          "dialogs": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        },
+        "required": ["total_returned", "search_truncated", "dialogs"],
+        "additionalProperties": true
+      },
+      "annotations": {
+        "title": "Find conversations",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "list_clients",
+      "title": "List clients",
+      "description": "List project clients, optionally filtering by phone. Use this for a client inventory or to look up a phone number without changing data. The Public API matches part of a normalized phone number. Follow page/has_more to continue.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "description": "Phone number or part of one. The Public API searches normalized phone numbers."
+          },
+          "page": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "API page, starting at 1. Default: 1."
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "description": "Clients per page, 1 to 100. Default: 20."
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "clients": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "total_returned": {
+            "type": "integer"
+          },
+          "page": {
+            "type": "integer"
+          },
+          "has_more": {
+            "type": "boolean"
+          }
+        },
+        "required": ["clients", "total_returned", "page", "has_more"],
+        "additionalProperties": true
+      },
+      "annotations": {
+        "title": "List clients",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "find_messages",
+      "title": "Find messages",
+      "description": "List project messages, optionally filtered by conversation, client ID, channel, or message text. The query parameter searches message text, not message IDs. To edit, delete, or resend a known message_id, use manage_sent_message directly. Text matching runs only on the returned API page because the Public API has no full-text filter. Continue through pages while has_more is true before concluding that an older message is absent. Use this instead of find_conversations for text in historical messages.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Case-insensitive substring in message text on this page only. Empty results do not mean no match exists on later pages."
+          },
+          "dialog_id": {
+            "type": "string",
+            "description": "Conversation ID to restrict messages. From find_conversations or a conversation link."
+          },
+          "client_id": {
+            "type": "string",
+            "description": "Exact client ID to restrict messages. Use list_clients or lookup_client_profile first."
+          },
+          "channel": {
+            "type": "string",
+            "description": "Channel name, type, or ID. Resolves to channelId."
+          },
+          "only_active": {
+            "type": "boolean",
+            "description": "Limit to active channels when channel is omitted. Default: false."
+          },
+          "page": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "API page to inspect, starting at 1. Default: 1."
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "description": "Messages per API page, 1 to 100. Default: 50."
+          },
+          "response_format": {
+            "type": "string",
+            "enum": ["concise", "detailed"],
+            "description": "Concise text by default, detailed text includes full message bodies. structuredContent always includes full text."
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "messages": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "total_returned": {
+            "type": "integer"
+          },
+          "page": {
+            "type": "integer"
+          },
+          "has_more": {
+            "type": "boolean"
+          }
+        },
+        "required": ["messages", "total_returned", "page", "has_more"],
+        "additionalProperties": true
+      },
+      "annotations": {
+        "title": "Find messages",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "lookup_client_profile",
+      "title": "Client profile lookup",
+      "description": "Get a client's contact details, tags, custom fields, recent notes, and conversations in one call. Each recent_dialogs item includes link_to_dialog. Show these links as Markdown. Accepts a name, phone number, email, or client_id. If a name is ambiguous, the result lists candidates so you can retry with a client_id or phone number.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "client": {
+            "type": "string",
+            "description": "Client name, phone (any format), email or client_id."
+          },
+          "include_dialog_history": {
+            "type": "boolean",
+            "description": "Whether to include a list of the last 5 conversations. Defaults to true."
+          },
+          "include_notes": {
+            "type": "boolean",
+            "description": "Whether to include operator notes. Defaults to true."
+          },
+          "response_format": {
+            "type": "string",
+            "enum": ["concise", "detailed"],
+            "description": "'concise' (default) keeps the text output short. 'detailed' adds per-item fields to the text output (ids, statuses, timestamps, full message texts). structuredContent always contains every field regardless of this parameter."
+          }
+        },
+        "required": ["client"],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "client_id": {
+            "type": "string"
+          },
+          "recent_dialogs": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "partial_errors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["client_id", "recent_dialogs", "partial_errors"],
+        "additionalProperties": true
+      },
+      "annotations": {
+        "title": "Client profile lookup",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "read_conversation_thread",
+      "title": "Read conversation thread",
+      "description": "Read a conversation's messages in chronological order, including authors, attachments, replies, delivery status, and timestamps. Also returns the channel, client, operator, and category. Show link_to_dialog when presenting the conversation and link_to_message when quoting a message. If dialog_id is already known, pass it directly without listing or searching conversations. Alternatively pass a client to read their latest conversation. When drafting a reply, do not promise actions, deadlines, or policy exceptions that the conversation does not establish.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "dialog_id": {
+            "type": "string",
+            "description": "Conversation ID. Use a known ID directly. Call find_conversations only if the ID is missing."
+          },
+          "client": {
+            "type": "string",
+            "description": "Alternative dialog_id: name/phone/email/client_id. The client's last conversation will be taken."
+          },
+          "messages_limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200,
+            "description": "How many recent messages to return. Default is 50. Allowed range is 1 to 200."
+          },
+          "mark_seen": {
+            "type": "boolean",
+            "description": "If true, marks the conversation as read by an operator (resets the unread badge in the Teletype panel). Requires confirm: true. Default is false."
+          },
+          "confirm": {
+            "type": "boolean",
+            "const": true,
+            "description": "Required only with mark_seen: true. Without it a mark_seen request is rejected and nothing is read. Without mark_seen the call only reads and leaves the unread state untouched."
+          },
+          "include_sessions": {
+            "type": "boolean",
+            "description": "Include the conversation's session history (dates, operators, statuses, and categories). Default: false."
+          },
+          "session_id": {
+            "type": "string",
+            "description": "ID of a specific session to obtain extended information about it."
+          },
+          "include_group_clients": {
+            "type": "boolean",
+            "description": "If true and the conversation is a group chat, returns a list of group members. Default is false."
+          },
+          "response_format": {
+            "type": "string",
+            "enum": ["concise", "detailed"],
+            "description": "'concise' (default) keeps the text output short. 'detailed' adds per-item fields to the text output (ids, statuses, timestamps, full message texts). structuredContent always contains every field regardless of this parameter."
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "dialog_id": {
+            "type": "string"
+          },
+          "messages_count": {
+            "type": "integer"
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "marked_seen": {
+            "type": "boolean"
+          },
+          "notices": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["dialog_id", "messages_count", "messages"],
+        "additionalProperties": true
+      },
+      "annotations": {
+        "title": "Read conversation thread",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "read_client_history",
+      "title": "Read client history",
+      "description": "Read a client's recent conversations in one call: the latest dialogs with their messages, channels, and links. Use it to get context on a client across several conversations before replying. read_conversation_thread returns the full metadata of one dialog. Accepts a name, phone number, email, or client_id.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "client": {
+            "type": "string",
+            "description": "Client name, phone (any format), email or client_id."
+          },
+          "dialogs_limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "description": "How many recent conversations to return, from 1 to 5. Default is 3."
+          },
+          "messages_per_dialog": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 20,
+            "description": "How many recent messages to return per conversation, from 1 to 20. Default is 10."
+          },
+          "response_format": {
+            "type": "string",
+            "enum": ["concise", "detailed"],
+            "description": "'concise' (default) keeps the text output short. 'detailed' adds per-item fields to the text output (ids, statuses, timestamps, full message texts). structuredContent always contains every field regardless of this parameter."
+          }
+        },
+        "required": ["client"],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "client_id": {
+            "type": "string"
+          },
+          "client_name": {
+            "type": "string"
+          },
+          "dialogs_returned": {
+            "type": "integer"
+          },
+          "dialogs": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "partial_errors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["client_id", "client_name", "dialogs_returned", "dialogs", "partial_errors"],
+        "additionalProperties": true
+      },
+      "annotations": {
+        "title": "Read client history",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "send_reply_to_client",
+      "title": "Send reply to client",
+      "description": "Send a message only when the user asked to send it. Pass recipient_dialog_id for an existing conversation, or client and channel to start one. For a draft, use read_conversation_thread and write the draft without calling this tool. Supports text, project templates, attachments, and reply_to_message_id. Marks the conversation answered by default. Requires confirm: true. The result reports API acceptance, not confirmed delivery.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "recipient_dialog_id": {
+            "type": "string",
+            "description": "ID of the existing conversation to reply to. If set, the client/channel parameters are ignored."
+          },
+          "client": {
+            "type": "string",
+            "description": "For a NEW conversation: recipient's name/phone/email/client_id."
+          },
+          "channel": {
+            "type": "string",
+            "description": "For a NEW conversation: name or type of sending channel (telegram, whatsapp_teletype, email, etc.)."
+          },
+          "text": {
+            "type": "string",
+            "description": "Message text. Optional if template_name is used."
+          },
+          "template_name": {
+            "type": "string",
+            "description": "The name of the template from the project library. List - list_workspace_metadata with resource='templates'."
+          },
+          "template_variables": {
+            "type": "object",
+            "description": "Substitutions for the template: {'name': 'Ivan', 'order_id': '1234'}. In the template, variables are designated {{name}}.",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "attachment_url": {
+            "type": "string",
+            "description": "Public URL of the file or image. Teletype will download the file from this URL and send it to the channel. Use if the file has already been uploaded to the cloud (S3 presigned, Dropbox direct, etc.)."
+          },
+          "attachment_path": {
+            "type": "string",
+            "description": "Absolute path to a local attachment. Available only in trusted stdio mode. HTTP rejects local paths. Takes precedence over attachment_url."
+          },
+          "reply_to_message_id": {
+            "type": "string",
+            "description": "ID of the message that is being quoted."
+          },
+          "mark_dialog_answered": {
+            "type": "boolean",
+            "description": "Whether to mark the conversation as answered after sending. Defaults to true."
+          },
+          "auto_close": {
+            "type": "boolean",
+            "description": "When sending through a channel (recipient_type='channel'), close the new session automatically (autoClose=1)."
+          },
+          "create_dialog_only": {
+            "type": "boolean",
+            "description": "Create a conversation with a client in a channel without sending text (via /dialog/create). Requires client and channel."
+          },
+          "confirm": {
+            "type": "boolean",
+            "const": true,
+            "description": "Explicit confirmation of sending a message or creating a conversation."
+          },
+          "dry_run": {
+            "type": "boolean",
+            "description": "Preview only: resolve the recipient, render the template, and return the full target without sending anything. Does not require confirm."
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "accepted": {
+            "type": "boolean"
+          },
+          "delivery_confirmed": {
+            "type": "boolean"
+          },
+          "message_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "dry_run": {
+            "type": "boolean"
+          }
+        },
+        "required": [],
+        "additionalProperties": true
+      },
+      "annotations": {
+        "title": "Send reply to client",
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "create_dialog_by_phone",
+      "title": "Create dialog by phone",
+      "description": "Create or find a conversation for a phone number in a phone-capable channel without sending a message. This is a write, not a phone lookup: it may create a conversation and may assign the project owner to an existing open conversation. Use list_clients to check a phone without changing data. Preview with dry_run, then call with confirm: true only when creation is requested.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "description": "Recipient phone number. Use an international number when available."
+          },
+          "channel": {
+            "type": "string",
+            "description": "Phone-capable channel name, type, or ID: WhatsApp, MAX, SMS, Kakao, Telegram, or VK Direct."
+          },
+          "dry_run": {
+            "type": "boolean",
+            "description": "Preview the channel, phone, and possible side effects without creating a dialog."
+          },
+          "confirm": {
+            "type": "boolean",
+            "const": true,
+            "description": "Explicit confirmation to create or find the dialog. May change the operator of an existing open dialog."
+          }
+        },
+        "required": ["phone", "channel"],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "dry_run": {
+            "type": "boolean"
+          },
+          "created_or_found": {
+            "type": "boolean"
+          },
+          "dialog_id": {
+            "type": "string"
+          },
+          "dialog_url": {
+            "type": "string"
+          }
+        },
+        "required": ["dry_run", "created_or_found"],
+        "additionalProperties": true
+      },
+      "annotations": {
+        "title": "Create dialog by phone",
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "annotate_client_record",
+      "title": "Annotate client record",
+      "description": "Update client or conversation metadata in one call: add or remove tags, create a note, update custom fields, or set a category. Tags, notes, and fields apply to the client. dialog_category applies to the dialog and requires dialog_id. A note becomes a system message in the client's current conversation timeline, visible to operators in the Teletype panel. If an operation fails, other changes may still have been applied. Check partial_errors before retrying. Requires confirm: true.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "client": {
+            "type": "string",
+            "description": "Name/phone/email/client_id. Optional if dialog_id identifies the client."
+          },
+          "dialog_id": {
+            "type": "string",
+            "description": "Conversation ID. Required for dialog_category and can identify the client for other changes."
+          },
+          "add_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Names of tags to add. Non-existent tags are listed in partial_errors."
+          },
+          "remove_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Names of tags to be deleted."
+          },
+          "note": {
+            "type": "string",
+            "description": "The text of the new note. It appears in the client's current conversation timeline, visible to operators."
+          },
+          "delete_note_id": {
+            "type": "string",
+            "description": "ID of the client note to delete (obtained from lookup_client_profile)."
+          },
+          "custom_fields": {
+            "type": "object",
+            "description": "Dictionary of custom fields: {'order_id': '1234', 'segment': 'B2B'}. Replaces existing values by key.",
+            "additionalProperties": true
+          },
+          "dialog_category": {
+            "type": "string",
+            "description": "Category name for the dialog (requires dialog_id)."
+          },
+          "name": {
+            "type": "string",
+            "description": "Update client display name."
+          },
+          "phone": {
+            "type": "string",
+            "description": "Update the client's phone."
+          },
+          "email": {
+            "type": "string",
+            "description": "Update client email."
+          },
+          "additional_payload": {
+            "description": "Additional client data (JSON string or object, for example { source: 'website' }).",
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": true
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "force_additional_payload": {
+            "type": "boolean",
+            "description": "Overwrite the data available in the additional information array (true) instead of merging it (false)."
+          },
+          "confirm": {
+            "type": "boolean",
+            "const": true,
+            "description": "Explicit confirmation of changes to client data or conversation."
+          }
+        },
+        "required": ["confirm"],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "applied": {
+            "type": "object"
+          },
+          "partial_errors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["applied", "partial_errors"],
+        "additionalProperties": true
+      },
+      "annotations": {
+        "title": "Annotate client record",
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "resolve_conversation",
+      "title": "Resolve conversation",
+      "description": "Close a conversation or hand it to an operator. Default: close=true. Use close=false only when the user wants it left open. Category, tags, operator, and final note are optional, separate changes. Closing does not require a category. Look up exact category and tag names before using them. Requires confirm: true. Read applied and partial_errors before reporting or retrying.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "dialog_id": {
+            "type": "string",
+            "description": "Conversation ID. Use a known ID directly. Look it up only if the ID is missing."
+          },
+          "assign_operator": {
+            "type": "string",
+            "description": "Assign an operator to the conversation (ID, name, email of the operator, or 'auto' for automatic distribution)."
+          },
+          "close": {
+            "type": "boolean",
+            "description": "Close the dialog after completing other actions (true by default). Specify false if you only want to assign an operator, set a category or tags, leaving the dialog open."
+          },
+          "final_note": {
+            "type": "string",
+            "description": "A final note about the client is attached upon closing."
+          },
+          "category": {
+            "type": "string",
+            "description": "Optional exact category name. First list_workspace_metadata(resource='categories') if the user requested a category. Do not infer or translate a category name from 'resolved' or 'closed'. Omit this field when merely closing a conversation."
+          },
+          "add_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Client tags to add when closing."
+          },
+          "mark_unanswered": {
+            "type": "boolean",
+            "description": "If true, it does not close the conversation, but marks its open requests as unanswered. Closed requests are not re-opened."
+          },
+          "mark_answered": {
+            "type": "boolean",
+            "description": "If true, marks open requests in the conversation as answered (clears the unanswered flag)."
+          },
+          "confirm": {
+            "type": "boolean",
+            "const": true,
+            "description": "Explicit confirmation to close or mark the conversation as unanswered/answered."
+          }
+        },
+        "required": ["dialog_id", "confirm"],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "dialog_id": {
+            "type": "string"
+          },
+          "applied": {
+            "type": "object"
+          },
+          "partial_errors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["dialog_id", "applied", "partial_errors"],
+        "additionalProperties": true
+      },
+      "annotations": {
+        "title": "Resolve conversation",
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "list_workspace_metadata",
+      "title": "Workspace metadata",
+      "description": "Look up project channels, tags, categories, quick reply templates, operators, or groups. Set resource to the requested kind. The default 'all' can truncate each list and does extra API work. Use resource='channels' for channel names and active state, or resource='categories' before assigning a category. WABA templates are separate. Results are cached for one minute.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "resource": {
+            "type": "string",
+            "enum": [
+              "channels",
+              "tags",
+              "categories",
+              "templates",
+              "template_directories",
+              "operators",
+              "groups",
+              "all"
+            ],
+            "description": "Choose one resource when possible: channels, tags, categories, templates, template_directories, operators, or groups. 'all' returns several limited lists and is for requests about the whole workspace."
+          },
+          "group_id": {
+            "type": "string",
+            "description": "Optional: ID or group name for obtaining detailed data (operators, supervisors, channels) via /group/view/:groupId."
+          },
+          "channel_type": {
+            "type": "string",
+            "description": "For resource='channels': filtering by channel type (for example telegram, email, whatsapp_teletype)."
+          },
+          "only_active": {
+            "type": "boolean",
+            "description": "For resource='channels': return only active channels."
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "resource_errors": {
+            "type": "object"
+          },
+          "group": {
+            "type": "object"
+          }
+        },
+        "required": ["resource_errors"],
+        "additionalProperties": true
+      },
+      "annotations": {
+        "title": "Workspace metadata",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "get_project_status",
+      "title": "Project status",
+      "description": "Check project health: finances, operator availability, Public API status, channel activity, and webhook errors. For a technical check of channels or the Public API, set aspect='technical'. Use list_workspace_metadata(resource='channels') when the user wants the channel inventory. Includes derived warnings.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "aspect": {
+            "type": "string",
+            "enum": ["financial", "team", "technical", "all"],
+            "description": "Choose 'technical' for channels, Public API, or webhook health, 'financial' for balance and billing, 'team' for operators, or 'all' for a whole-project overview. Default is 'all'."
+          },
+          "include_warnings": {
+            "type": "boolean",
+            "description": "Whether to include a derived warning block. Defaults to true."
+          },
+          "operator_details": {
+            "type": "boolean",
+            "description": "If true, an expanded list of operators is returned to team. Default is false."
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "annotations": {
+        "title": "Project status",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "manage_sent_message",
+      "title": "Manage sent message",
+      "description": "Manage a sent message in Teletype by its message_id: edit the text, delete it, or resend after failure. If the user supplied message_id, use it directly rather than searching message text. Otherwise take it from the send result's message_ids or read_conversation_thread. Requires an explicit confirm: true.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "message_id": {
+            "type": "string",
+            "description": "Message ID obtained from send_reply_to_client or read_conversation_thread."
+          },
+          "action": {
+            "type": "string",
+            "enum": ["update", "delete", "resend"],
+            "description": "Action: 'update' (edit text), 'delete' (delete), 'resend' (resend)."
+          },
+          "text": {
+            "type": "string",
+            "description": "New message text (required for action='update')."
+          },
+          "confirm": {
+            "type": "boolean",
+            "const": true,
+            "description": "Confirms the requested message operation."
+          }
+        },
+        "required": ["message_id", "action", "confirm"],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "message_id": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": ["message_id", "action", "status"],
+        "additionalProperties": true
+      },
+      "annotations": {
+        "title": "Manage sent message",
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "send_whatsapp_template",
+      "title": "Send WhatsApp template",
+      "description": "Send a WABA-approved template in an existing Edna WhatsApp conversation outside the 24-hour service window. Get the WABA template ID from project settings or the user. Quick reply templates returned by list_workspace_metadata are different. Requires confirm: true.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "channel_id": {
+            "type": "string",
+            "description": "WhatsApp channel ID. Use a known ID directly. Call list_workspace_metadata(resource='channels') only if it is missing."
+          },
+          "dialog_id": {
+            "type": "string",
+            "description": "Conversation ID. Use a known ID directly. Call find_conversations only if it is missing."
+          },
+          "template_id": {
+            "type": "string",
+            "description": "ID of a WABA approved template imported from Edna. It is not in resource='templates' with the list of quick responses."
+          },
+          "template_params": {
+            "type": "object",
+            "description": "Template parameters: text_variables (array of strings for variables like {{1}}, {{2}}), button_variables, header_variables, attachment.",
+            "properties": {
+              "text_variables": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Text values to be substituted into the template body."
+              },
+              "header_variables": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Values for variables in the template header."
+              },
+              "button_variables": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Values for template button variables."
+              },
+              "attachment": {
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "required": ["url"]
+              }
+            },
+            "additionalProperties": true
+          },
+          "template_options": {
+            "type": "object",
+            "properties": {
+              "priority": {
+                "type": "string",
+                "enum": ["LOW", "NORMAL", "HIGH", "REALTIME"]
+              },
+              "sendDelay": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "comment": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          },
+          "confirm": {
+            "type": "boolean",
+            "const": true,
+            "description": "Confirms sending the WhatsApp template to the client."
+          },
+          "dry_run": {
+            "type": "boolean",
+            "description": "Preview only: validate parameters and return the target conversation and template without sending. Does not require confirm."
+          }
+        },
+        "required": ["channel_id", "dialog_id", "template_id"],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "channel_id": {
+            "type": "string"
+          },
+          "dialog_id": {
+            "type": "string"
+          },
+          "template_id": {
+            "type": "string"
+          },
+          "message_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "accepted": {
+            "type": "boolean"
+          },
+          "delivery_confirmed": {
+            "type": "boolean"
+          },
+          "dry_run": {
+            "type": "boolean"
+          }
+        },
+        "required": ["channel_id", "dialog_id", "template_id"],
+        "additionalProperties": true
+      },
+      "annotations": {
+        "title": "Send WhatsApp template",
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "manage_operator_group",
+      "title": "Manage operator group",
+      "description": "Manage operator groups: add or remove members, link or unlink channels, assign supervisors, and control visibility of other operators' conversations. Take group names from list_workspace_metadata(resource='groups'). Requires confirm: true.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "add_member",
+              "remove_member",
+              "add_channel",
+              "remove_channel",
+              "set_supervisor",
+              "set_channel_visibility"
+            ],
+            "description": "Action: add_member (add operator), remove_member (remove operator), add_channel (bind channel), remove_channel (unlink channel), set_supervisor (assign/remove supervisor), set_channel_visibility (dialog visibility)."
+          },
+          "group": {
+            "type": "string",
+            "description": "Operator group name or ID (get it via list_workspace_metadata with resource='groups')."
+          },
+          "operator": {
+            "type": "string",
+            "description": "Operator name or ID (for add_member, remove_member, set_supervisor)."
+          },
+          "channel": {
+            "type": "string",
+            "description": "Channel name or ID (for add_channel, remove_channel, set_channel_visibility)."
+          },
+          "is_supervisor": {
+            "type": "boolean",
+            "description": "For set_supervisor, true grants supervisor access and false removes it."
+          },
+          "can_view_other_dialogs": {
+            "type": "boolean",
+            "description": "For set_channel_visibility: true - allow viewing of other people's conversations in the channel, false - prohibit."
+          },
+          "confirm": {
+            "type": "boolean",
+            "const": true,
+            "description": "Explicit confirmation of a group configuration change."
+          }
+        },
+        "required": ["action", "group", "confirm"],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "action": {
+            "type": "string"
+          },
+          "group_id": {
+            "type": "string"
+          },
+          "hint": {
+            "type": "string"
+          }
+        },
+        "required": ["success", "action", "group_id"],
+        "additionalProperties": true
+      },
+      "annotations": {
+        "title": "Manage operator group",
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "configure_project_webhook",
+      "title": "Configure project webhook",
+      "description": "Configure the project's Public API webhook URL and active events. An empty active_events list disables all events. Requires confirm: true.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "webhook_url": {
+            "type": "string",
+            "description": "URL that receives webhooks. An empty string removes the current URL."
+          },
+          "active_events": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "new message",
+                "success send",
+                "message status change",
+                "message deleted",
+                "new note",
+                "new dialog",
+                "open dialog",
+                "close dialog",
+                "person change",
+                "appeal rate",
+                "messages templates updated",
+                "session operator changed",
+                "channel deleted",
+                "channel status updated"
+              ]
+            },
+            "description": "List of events to activate. A missing or empty list disables all events."
+          },
+          "confirm": {
+            "type": "boolean",
+            "const": true,
+            "description": "Explicit confirmation of changing the project webhook settings."
+          }
+        },
+        "required": ["confirm"],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "webhook_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "active_events": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["success"],
+        "additionalProperties": true
+      },
+      "annotations": {
+        "title": "Configure project webhook",
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "get_capabilities",
+      "title": "Server capabilities",
+      "description": "Return the server's active tool map: read-only mode, active toolsets, registered tools with their toolset and whether they write data, locale, and local-upload availability. Call this first when unsure which tools or filters are available. It fetches the project identity once and caches it for 10 minutes.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "read_only": {
+            "type": "boolean"
+          },
+          "active_toolsets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "available_toolsets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "project": {
+            "type": "object"
+          },
+          "tools": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "locale": {
+            "type": "string"
+          },
+          "local_uploads": {
+            "type": "boolean"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["read_only", "active_toolsets", "tools"],
+        "additionalProperties": true
+      },
+      "annotations": {
+        "title": "Server capabilities",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      }
+    }
+  ],
+  "version": "0.1.1",
+  "cloudEndpoint": "https://mcp.teletype.app/mcp",
+  "localizations": [
+    {
+      "locale": "ru-RU",
+      "name": "Teletype",
+      "description": "MCP-сервер Teletype для клиентской поддержки: диалоги, профили клиентов, ответы и настройки проекта.",
+      "tags": ["поддержка-клиентов", "мессенджеры", "teletype", "mcp"]
+    }
+  ]
+}

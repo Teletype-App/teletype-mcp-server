@@ -10,6 +10,10 @@ MCP server for [Teletype](https://teletype.app). Its tools cover daily support w
 
 ## Quick start
 
+[![Install in Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/link/mcp/install?name=teletype&config=eyJ1cmwiOiJodHRwczovL21jcC50ZWxldHlwZS5hcHAvbWNwIiwiaGVhZGVycyI6eyJYLVRlbGV0eXBlLUFwaS1Ub2tlbiI6IiR7ZW52OlRFTEVUWVBFX0FQSV9UT0tFTn0ifX0%3D) [![Install in VS Code](https://img.shields.io/badge/Install_in-VS_Code-0098FF)](https://insiders.vscode.dev/redirect?url=vscode%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522teletype%2522%252C%2522type%2522%253A%2522http%2522%252C%2522url%2522%253A%2522https%253A%252F%252Fmcp.teletype.app%252Fmcp%2522%252C%2522headers%2522%253A%257B%2522X-Teletype-Api-Token%2522%253A%2522%2524%257Binput%253Ateletype-api-token%257D%2522%257D%252C%2522inputs%2522%253A%255B%257B%2522type%2522%253A%2522promptString%2522%252C%2522id%2522%253A%2522teletype-api-token%2522%252C%2522description%2522%253A%2522Teletype%2520Public%2520API%2520token%2522%252C%2522password%2522%253Atrue%257D%255D%257D)
+
+VS Code asks for the project token when connecting. For Cursor, set `TELETYPE_API_TOKEN` in the app environment before opening the connection. See the [client guide](docs/CLIENTS.md#cursor).
+
 **Hosted server (recommended).** Teletype runs the MCP server at `https://mcp.teletype.app/mcp`. Connect with your project's Public API token. No local installation is needed. In Claude Code:
 
 ```bash
@@ -31,7 +35,7 @@ or merge [this file](examples/clients/claude-code-remote.json) into `.mcp.json` 
 }
 ```
 
-For Claude Code and Codex, plugins install the server and the `teletype-support` skill in one step. See [Plugins for Claude Code and Codex](#plugins-for-claude-code-and-codex).
+For Claude Code and Codex, plugins install the server and the `teletype-support` skill in one step. See [Plugins for Claude Code, Codex, and Cursor](#plugins-for-claude-code-codex-and-cursor).
 
 **Run locally.** Claude Desktop users on macOS or Windows can download the `.mcpb` file from the project's [releases](https://github.com/Teletype-App/teletype-mcp-server/releases), open it, and enter their Teletype Public API token when prompted. To run from source, use `npm ci && npm run build`, then point an MCP client at `node /absolute/path/to/dist/index.js --stdio` with `TELETYPE_API_TOKEN` in its environment.
 
@@ -59,7 +63,7 @@ For Cursor, Zed, and other MCP clients, use the same command, arguments, and env
 
 For Cursor, VS Code with Copilot, Codex, Claude Code, OpenCode, Antigravity CLI, and other supported clients, see [MCP clients](docs/CLIENTS.md). The examples cover hosted HTTP and local stdio connections. A separate OpenAI-compatible endpoint is optional and only used by `eval:model`.
 
-For Claude Code and Codex there are plugins that install the server, the `teletype-support` skill, and support slash commands in one step. See [Plugins for Claude Code and Codex](#plugins-for-claude-code-and-codex).
+For Claude Code and Codex there are plugins that install the server, the `teletype-support` skill, and support slash commands in one step. See [Plugins for Claude Code, Codex, and Cursor](#plugins-for-claude-code-codex-and-cursor).
 
 ## Tools
 
@@ -114,20 +118,24 @@ The server provides these support prompts:
 - `teletype://dialogs/{dialogId}`: full message history for a specific dialogue by ID.
 - `teletype://clients/{clientId}`: client profile, tags, and notes by client ID.
 
-## Plugins for Claude Code and Codex
+## Plugins for Claude Code, Codex, and Cursor
 
-The repository is a plugin marketplace for both clients, and one `plugin/` directory serves both formats: `.claude-plugin/plugin.json` plus `commands/` for Claude Code, the portable [Agent Plugins](https://agent-plugins.org) manifests `plugin.json` and `mcp.json` for Codex, and the shared [skills/teletype-support](plugin/skills/teletype-support/SKILL.md).
+The repository contains marketplaces for Claude Code, Codex, and Cursor. The `plugin/` directory includes `.claude-plugin/plugin.json` and `.cursor-plugin/plugin.json`, the portable [Agent Plugins](https://agent-plugins.org) manifests `plugin.json` and `mcp.json`, the shared [support skill](plugin/skills/teletype-support/SKILL.md), and commands. See the [plugin README](plugin/README.md) for configuration and data access.
 
 ### Claude Code
 
-The plugin bundles the hosted MCP server (`https://mcp.teletype.app/mcp`, authenticated with the `X-Teletype-Api-Token` header expanded from `TELETYPE_API_TOKEN`), the `teletype-support` skill with the support workflows and safety rules, and five slash commands that mirror the server's MCP prompts: `/triage-inbox`, `/draft-reply`, `/client-summary`, `/escalate-issue`, `/shift-handover`.
+The plugin bundles the hosted MCP server (`https://mcp.teletype.app/mcp`, authenticated with the `X-Teletype-Api-Token` header supplied by the plugin's sensitive configuration field), the `teletype-support` skill with the support workflows and safety rules, and five slash commands that mirror the server's MCP prompts: `/triage-inbox`, `/draft-reply`, `/client-summary`, `/escalate-issue`, `/shift-handover`.
 
 ```bash
 /plugin marketplace add Teletype-App/teletype-mcp-server
 /plugin install teletype@teletype-mcp-server
 ```
 
-Export `TELETYPE_API_TOKEN` in the shell before starting Claude Code. The bundled server inherits it from the client process. The skill carries the multi-step regulations that do not fit tool descriptions: triage order, dry-run before an ambiguous send, category lookup before closing. It triggers on support tasks without a slash command. The five workflows also exist as MCP prompts for clients that show them. The commands cover the sessions where they are not shown.
+When enabling the plugin, enter the token in the **Teletype Public API token** field. This required sensitive `userConfig` field stores the value in Claude's secure credential store and supplies the HTTP header. Use an up-to-date Claude Code version with `userConfig` support. The skill carries the multi-step regulations that do not fit tool descriptions: triage order, dry-run before an ambiguous send, category lookup before closing. It triggers on support tasks without a slash command. The five workflows also exist as MCP prompts for clients that show them. The commands cover the sessions where they are not shown.
+
+### Cursor
+
+The native Cursor manifest connects to the hosted server and includes the shared skill and commands. For a marketplace installation, set `TELETYPE_API_TOKEN` under **Plugins → Configure**. To connect directly without a plugin, follow the [Cursor setup guide](docs/CLIENTS.md#cursor).
 
 ### Codex
 
@@ -148,6 +156,14 @@ env_http_headers = { "X-Teletype-Api-Token" = "TELETYPE_API_TOKEN" }
 Codex also reads skills without plugins from `.agents/skills` in the repository or `~/.agents/skills` for the user.
 
 ### Other agents
+
+Install the support skill with the [Skills CLI](https://github.com/vercel-labs/skills):
+
+```bash
+npx skills add Teletype-App/teletype-mcp-server --skill teletype-support
+```
+
+Select your agent and installation scope when prompted. This command installs the workflow instructions. Connect the MCP server separately using the [client guide](docs/CLIENTS.md).
 
 The skill uses the open [Agent Skills](https://agentskills.io) format, supported by OpenCode, Cursor, Gemini CLI, GitHub Copilot, Goose, and others. The npm package ships the skill, so after a regular install:
 
@@ -222,7 +238,9 @@ Endpoint: `POST /mcp`. Send the Teletype API token with every request in this he
 X-Teletype-Api-Token: <token>
 ```
 
-Do not send the Teletype token in `Authorization`. The HTTP transport uses `X-Teletype-Api-Token` as its only project credential and has no separate user accounts or scopes. Use HTTPS for remote access. Anyone with the token can access the project through the MCP server.
+Do not send the Teletype project token in `Authorization`. Use HTTPS for remote access. Anyone with the project token can access its data through the MCP server, subject to deployment restrictions.
+
+OAuth is disabled on the public hosted endpoint at `https://mcp.teletype.app/mcp`. Connect with your project token in `X-Teletype-Api-Token`. For self-hosting, the code includes optional [OAuth](docs/OAUTH.md), disabled by default and enabled through separate configuration.
 
 ```bash
 TRANSPORT=http HOST=127.0.0.1 PORT=4311 npm start
@@ -230,10 +248,12 @@ TRANSPORT=http HOST=127.0.0.1 PORT=4311 npm start
 
 HTTP endpoints:
 
-| Method | Path       | Purpose                       |
-| ------ | ---------- | ----------------------------- |
-| POST   | `/mcp`     | stateless Streamable HTTP MCP |
-| GET    | `/healthz` | health probe                  |
+| Method | Path        | Purpose                                       |
+| ------ | ----------- | --------------------------------------------- |
+| GET    | `/`         | Russian and English landing page              |
+| GET    | `/assets/*` | landing page scripts, styles, logo, and fonts |
+| POST   | `/mcp`      | stateless Streamable HTTP MCP                 |
+| GET    | `/healthz`  | health probe                                  |
 
 Each HTTP request gets its own MCP Server and transport pair, so concurrent tenants do not share responses or context. The server limits concurrent requests globally and per token. It returns `429` with `Retry-After` when a limit is reached. The HTTP transport cannot read local files.
 
@@ -250,27 +270,39 @@ docker run --rm -p 127.0.0.1:4311:4311 \
 
 For a public domain, set its origin in `PUBLIC_BASE_URL` and terminate HTTPS at the reverse proxy.
 
+For an MCP client that starts a container over stdio, build the `stdio` target and forward the token from your private environment. Keep stdin open with `-i` and omit `-t`, which would interfere with MCP messages:
+
+```bash
+docker build --target stdio -t teletype-mcp-stdio .
+docker run --rm -i -e TELETYPE_API_TOKEN teletype-mcp-stdio
+```
+
+The stdio target runs as the same unprivileged user and does not expose an HTTP port or use an HTTP health check. Set `TELETYPE_MCP_READ_ONLY=true` to disable write tools.
+
 ## Configuration
 
-| Variable                      | Default                                  |
-| ----------------------------- | ---------------------------------------- |
-| `TRANSPORT`                   | `http`                                   |
-| `HOST` / `PORT`               | `127.0.0.1` / `4311`                     |
-| `PUBLIC_BASE_URL`             | `http://127.0.0.1:4311`                  |
-| `ALLOWED_ORIGINS`             | additional comma-separated origins       |
-| `TELETYPE_API_TOKEN`          | required for stdio                       |
-| `TELETYPE_API_BASE`           | `https://api.teletype.app/public/api/v1` |
-| `TELETYPE_PROJECT_URL`        | `teletype.app`                           |
-| `TELETYPE_MCP_LOCALE`         | `en` (`ru` for Russian text)             |
-| `TELETYPE_MCP_READ_ONLY`      | `true` unregisters write tools           |
-| `TELETYPE_MCP_TOOLSETS`       | comma-separated toolsets to register     |
-| `REQUEST_TIMEOUT_MS`          | `15000`                                  |
-| `MAX_RESPONSE_BYTES`          | `5000000`                                |
-| `MAX_UPLOAD_BYTES`            | `20000000`                               |
-| `MAX_CONCURRENT_REQUESTS`     | `32`                                     |
-| `MAX_CONCURRENT_PER_TOKEN`    | `4`                                      |
-| `ENABLE_LOCAL_UPLOADS`        | `false`                                  |
-| `TELETYPE_ALLOWED_FILE_ROOTS` | comma-separated permitted directories    |
+| Variable                      | Default                                            |
+| ----------------------------- | -------------------------------------------------- |
+| `TRANSPORT`                   | `http`                                             |
+| `HOST` / `PORT`               | `127.0.0.1` / `4311`                               |
+| `PUBLIC_BASE_URL`             | `http://127.0.0.1:4311`                            |
+| `ALLOWED_ORIGINS`             | additional comma-separated origins                 |
+| `OAUTH_ENABLED`               | `false`                                            |
+| `OAUTH_DB_PATH`               | persistent SQLite path when OAuth is enabled       |
+| `OAUTH_ENCRYPTION_KEY`        | private 64-character hex key when OAuth is enabled |
+| `TELETYPE_API_TOKEN`          | required for stdio                                 |
+| `TELETYPE_API_BASE`           | `https://api.teletype.app/public/api/v1`           |
+| `TELETYPE_PROJECT_URL`        | `teletype.app`                                     |
+| `TELETYPE_MCP_LOCALE`         | `en` (`ru` for Russian text)                       |
+| `TELETYPE_MCP_READ_ONLY`      | `true` unregisters write tools                     |
+| `TELETYPE_MCP_TOOLSETS`       | comma-separated toolsets to register               |
+| `REQUEST_TIMEOUT_MS`          | `15000`                                            |
+| `MAX_RESPONSE_BYTES`          | `5000000`                                          |
+| `MAX_UPLOAD_BYTES`            | `20000000`                                         |
+| `MAX_CONCURRENT_REQUESTS`     | `32`                                               |
+| `MAX_CONCURRENT_PER_TOKEN`    | `4`                                                |
+| `ENABLE_LOCAL_UPLOADS`        | `false`                                            |
+| `TELETYPE_ALLOWED_FILE_ROOTS` | comma-separated permitted directories              |
 
 `PUBLIC_BASE_URL` and each entry in `ALLOWED_ORIGINS` must be an origin without a path, query, or fragment. The server validates the value whenever a client sends an `Origin` header.
 
@@ -339,3 +371,9 @@ The report also includes outcome, first-attempt, answer, and safety rates. Each 
 `npm run test:mutation` runs the full mutation suite with a 33% score floor and writes reports to `reports/mutation/`. It takes longer and is not part of `npm run check`.
 
 See [SECURITY.md](docs/SECURITY.md) for vulnerability reporting and [CONTRIBUTING.md](docs/CONTRIBUTING.md) for contribution guidelines. The project uses the MIT license.
+
+## Support and privacy
+
+- [Teletype help center](https://help.teletype.app)
+- [Report a server issue](https://github.com/Teletype-App/teletype-mcp-server/issues)
+- [Teletype privacy policy](https://teletype.app/android/policy.html)

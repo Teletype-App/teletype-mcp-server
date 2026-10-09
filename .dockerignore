@@ -9,3 +9,9 @@ dist
 node_modules
 eval-report.json
 npm-debug.log*
+*.sqlite
+*.sqlite-*
+*.db
+*.db-*
+artifacts
+reports

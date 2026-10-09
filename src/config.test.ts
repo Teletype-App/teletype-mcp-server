@@ -61,4 +61,27 @@ describe("loadConfig", () => {
       /Unknown toolset 'marketing'/,
     );
   });
+
+  it("keeps OAuth opt-in and requires a database and encryption key", () => {
+    expect(loadConfig({}).oauth).toBeUndefined();
+    expect(() => loadConfig({ OAUTH_ENABLED: "true" })).toThrow(/OAUTH_DB_PATH/);
+    expect(() =>
+      loadConfig({
+        OAUTH_ENABLED: "true",
+        OAUTH_DB_PATH: "/tmp/oauth.sqlite",
+        OAUTH_ENCRYPTION_KEY: "short",
+      }),
+    ).toThrow(/OAUTH_ENCRYPTION_KEY/);
+  });
+
+  it("requires HTTPS for browser OAuth outside loopback", () => {
+    expect(() =>
+      loadConfig({
+        OAUTH_ENABLED: "true",
+        OAUTH_DB_PATH: "/tmp/oauth.sqlite",
+        OAUTH_ENCRYPTION_KEY: "a".repeat(64),
+        PUBLIC_BASE_URL: "http://mcp.example.test",
+      }),
+    ).toThrow(/HTTPS/);
+  });
 });

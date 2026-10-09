@@ -1,0 +1,22 @@
+{
+  "name": "teletype",
+  "version": "0.1.1",
+  "description": "Teletype customer support: triage conversations, read customer history, draft replies, and hand over shifts.",
+  "mcpServers": {
+    "teletype": {
+      "httpUrl": "https://mcp.teletype.app/mcp",
+      "headers": {
+        "X-Teletype-Api-Token": "${TELETYPE_API_TOKEN}"
+      }
+    }
+  },
+  "contextFileName": "plugin/skills/teletype-support/SKILL.md",
+  "settings": [
+    {
+      "name": "Teletype Public API token",
+      "description": "Project token from Teletype settings. The assistant can access this project's conversations and customer data.",
+      "envVar": "TELETYPE_API_TOKEN",
+      "sensitive": true
+    }
+  ]
+}
