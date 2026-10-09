@@ -48,9 +48,7 @@ jobs:
       - run: npm ci
       - run: npm run build
       - name: Verify release metadata
-        env:
-          GITHUB_REF_NAME: ${{ inputs.release_tag }}
-        run: npm run release:verify
+        run: GITHUB_REF_NAME="$RELEASE_TAG" npm run release:verify
       - name: Wait for the npm version
         run: |
           PACKAGE_SPEC="$(node -p 'const p = require("./package.json"); p.name + "@" + p.version')"
