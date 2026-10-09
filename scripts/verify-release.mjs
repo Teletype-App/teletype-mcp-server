@@ -8,6 +8,19 @@ const expectedTag = `v${packageJson.version}`;
 const actualTag = process.env.GITHUB_REF_NAME;
 const lockfile = JSON.parse(readFileSync(new URL("../package-lock.json", import.meta.url), "utf8"));
 
+if (process.env.GITHUB_REPOSITORY) {
+  const repository = process.env.GITHUB_REPOSITORY;
+  const namespace = `io.github.${repository.split("/")[0]}/`;
+  if (!packageJson.mcpName.startsWith(namespace)) {
+    console.error(`MCP Registry namespace must match GitHub owner case: ${namespace}.`);
+    process.exitCode = 1;
+  }
+  if (packageJson.repository?.url !== `git+https://github.com/${repository}.git`) {
+    console.error("Package repository URL must exactly match GitHub provenance, including case.");
+    process.exitCode = 1;
+  }
+}
+
 if (
   lockfile.version !== packageJson.version ||
   lockfile.packages?.[""]?.version !== packageJson.version

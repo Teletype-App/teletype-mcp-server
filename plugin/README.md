@@ -23,7 +23,7 @@ The Cursor manifest is `.cursor-plugin/plugin.json`. For a marketplace installat
 
 ## Codex and Agent Plugins
 
-The portable `plugin.json` and `mcp.json` add the skill and a local stdio server. The launcher runs `npx -y teletype-mcp-server@0.1.1 --stdio`. It downloads the pinned npm package and starts it locally. See the [Codex setup guide](https://github.com/Teletype-App/teletype-mcp-server/blob/main/docs/CLIENTS.md#codex) for client configuration and installation.
+The portable `plugin.json` and `mcp.json` add the skill and a local stdio server. The launcher runs `npx -y teletype-mcp-server@0.1.2 --stdio`. It downloads the pinned npm package and starts it locally. See the [Codex setup guide](https://github.com/Teletype-App/teletype-mcp-server/blob/main/docs/CLIENTS.md#codex) for client configuration and installation.
 
 ## Kiro Powers
 

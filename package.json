@@ -1,7 +1,7 @@
 {
   "name": "teletype-mcp-server",
-  "mcpName": "io.github.teletype-app/teletype-mcp-server",
-  "version": "0.1.1",
+  "mcpName": "io.github.Teletype-App/teletype-mcp-server",
+  "version": "0.1.2",
   "description": "MCP server for Teletype customer support: conversations, customer profiles, replies, and workspace tools.",
   "type": "module",
   "main": "dist/index.js",

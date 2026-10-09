@@ -1,7 +1,7 @@
 {
   "name": "teletype",
   "displayName": "Teletype MCP Server",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Teletype support tools and workflows: triage the inbox, send replies safely, summarize clients, escalate issues, hand over shifts.",
   "author": {
     "name": "Teletype-App",
