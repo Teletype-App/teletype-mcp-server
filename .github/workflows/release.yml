@@ -63,6 +63,8 @@ jobs:
       - name: Install npm with trusted publishing support
         run: npm install --global npm@11.6.2
       - run: npm ci
+      - name: Match package repository to provenance
+        run: npm pkg set repository.url="git+https://github.com/$GITHUB_REPOSITORY.git"
       - run: npm run build
       - name: Publish to npm
         env:
