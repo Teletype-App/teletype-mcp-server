@@ -4,19 +4,36 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing version tag to publish or resume
+        required: true
+        type: string
+
+env:
+  RELEASE_TAG: ${{ inputs.release_tag || github.ref_name }}
 
 permissions:
   contents: read
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: release-${{ inputs.release_tag || github.ref_name }}
   cancel-in-progress: false
 
 jobs:
   check:
     runs-on: ubuntu-latest
     steps:
+      - name: Require a version tag
+        run: |
+          if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "release_tag must be a version tag, for example v0.1.1." >&2
+            exit 1
+          fi
       - uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ env.RELEASE_TAG }}
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -27,7 +44,7 @@ jobs:
       - run: npm run mcp:conformance
       - run: npm run bundle:mcpb
       - name: Verify tag, package, and CLI versions
-        run: npm run release:verify
+        run: GITHUB_REF_NAME="$RELEASE_TAG" npm run release:verify
 
   publish-npm:
     needs: check
@@ -37,6 +54,8 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ env.RELEASE_TAG }}
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -49,9 +68,22 @@ jobs:
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
+          PACKAGE_SPEC="$(node -p 'const p = require("./package.json"); p.name + "@" + p.version')"
+          EXPECTED_VERSION="$(node -p 'require("./package.json").version')"
+          if [[ "$(npm view "$PACKAGE_SPEC" version 2>/dev/null)" == "$EXPECTED_VERSION" ]]; then
+            echo "$PACKAGE_SPEC is already published."
+            exit 0
+          fi
+
+          export NPM_CONFIG_USERCONFIG="$RUNNER_TEMP/npm-publish.npmrc"
+          printf '%s\n' 'registry=https://registry.npmjs.org/' > "$NPM_CONFIG_USERCONFIG"
           if [ -n "$NPM_TOKEN" ]; then
+            # Keep the environment placeholder literal in the npm config.
+            # shellcheck disable=SC2016
+            printf '%s\n' '//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}' >> "$NPM_CONFIG_USERCONFIG"
             NODE_AUTH_TOKEN="$NPM_TOKEN" npm publish --provenance --access public
           else
+            unset NODE_AUTH_TOKEN
             npm publish --provenance --access public
           fi
 
@@ -62,16 +94,18 @@ jobs:
       id-token: write
     uses: ./.github/workflows/publish-registry.yml
     with:
-      release_tag: ${{ github.ref_name }}
+      release_tag: ${{ inputs.release_tag || github.ref_name }}
 
   publish-docker:
-    needs: publish-npm
+    needs: check
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ env.RELEASE_TAG }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Log in to GitHub Container Registry
@@ -86,8 +120,8 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{version}},value=${{ env.RELEASE_TAG }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ env.RELEASE_TAG }}
             type=raw,value=latest
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
@@ -100,12 +134,14 @@ jobs:
           cache-to: type=gha,mode=max
 
   create-github-release:
-    needs: publish-docker
+    needs: check
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ env.RELEASE_TAG }}
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -116,6 +152,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create "${{ github.ref_name }}" artifacts/*.mcpb \
-            --title "${{ github.ref_name }}" \
-            --generate-notes
+          if gh release view "$RELEASE_TAG" > /dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" artifacts/*.mcpb --clobber
+          else
+            gh release create "$RELEASE_TAG" artifacts/*.mcpb \
+              --verify-tag --title "$RELEASE_TAG" --generate-notes
+          fi
